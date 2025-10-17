@@ -1,47 +1,54 @@
 //
-//  ContentView.swift
+//  BrewManagerApp.swift
 //  BrewManager
 //
-//  Created by Izam on 11/10/2025.
+//  Created by Mohaned Yossry on 11/10/2025.
 //
 
 import SwiftUI
 import SwiftData
+import AppKit
 
-struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @State private var selectedItem: NavigationItems = .home
-    
-    
-    var body: some View {
-        NavigationSplitView {
-            List(selection: $selectedItem) {
-                ForEach(NavigationItems.allCases , id: \.title) { item in
-                    NavigationLink(value: item) {
-                        HStack {
-                            if !item.systemImageName.isEmpty {
-                                Image(systemName: item.systemImageName)
-                            }
-                            Text(item.title)
-                        }
-                    }
-                }
-                
-            }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-        } detail: {
-            selectedItem.view
-                .padding()
+@main
+struct BrewManagerApp: App {
+    var sharedModelContainer: ModelContainer = {
+        let schema = Schema([
+            Item.self,
+        ])
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+
+        do {
+            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
         }
-        
+    }()
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .background(WindowAccessor())
+        }
+        .modelContainer(sharedModelContainer)
     }
-    
-    
-    
-    
 }
 
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+struct WindowAccessor: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            if let window = view.window {
+                window.isOpaque = false
+                window.backgroundColor = .clear
+            }
+        }
+        return view
+    }
+    
+    func updateNSView(_ nsView: NSView, context: Context) {
+        if let window = nsView.window {
+            window.isOpaque = false
+            window.backgroundColor = .clear
+        }
+    }
 }

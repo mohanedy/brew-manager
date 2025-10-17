@@ -2,7 +2,7 @@
 //  BrewInfoResponse.swift
 //  BrewManager
 //
-//  Created by Izam on 17/10/2025.
+//  Created by Mohaned Yossry on 17/10/2025.
 //
 
 import Foundation

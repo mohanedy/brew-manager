@@ -2,14 +2,24 @@
 //  CardView.swift
 //  BrewManager
 //
-//  Created by Izam on 17/10/2025.
+//  Created by Mohaned Yossry on 17/10/2025.
 //
 
 import SwiftUI
 
 struct CardView: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            Text("Card View")
+                .font(.title)
+                .padding()
+            Text("This is a reusable card view component.")
+                .font(.body)
+                .padding([.leading, .trailing, .bottom])
+        }
+        .glassEffect()
+        .cornerRadius(10)
+        .shadow(radius: 5)
     }
 }
 
