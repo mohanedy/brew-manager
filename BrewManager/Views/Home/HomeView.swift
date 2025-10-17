@@ -19,27 +19,21 @@ struct HomeView: View {
             Text("Manage your Homebrew packages with ease.")
                 .font(.subheadline)
                 .padding(.bottom, 20)
-            HStack(alignment: .firstTextBaseline) {
-                Image("homebrew")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 20)
-                Text("Homebrew version is: \(store.brewVersion ?? "Unknown")")
-                    .font(.title3)
-                Spacer()
-                if store.isUpdating {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .scaleEffect(0.4)
-                }
-                Button("Update Homebrew", systemImage: "arrow.trianglehead.2.clockwise") {
+            HStack() {
+                CardView(
+                    title: "Homebrew Version",
+                    value: store.brewVersion ?? "Unknown",
+                    icon : Image("homebrew"),
+                    actionIcon: Image(systemName: "arrow.trianglehead.2.clockwise"),
+                    disabled: store.isUpdating
+                ) {
                     store.send(.updateHomebrewRequested)
                 }
-                .disabled(store.isUpdating)
             }
             .padding(.bottom, 20)
+      
             Text("Installed Formulas & Casks")
-                .font(.title2)
+                .font(.title3)
                 .padding(.bottom, 10)
             InstalledPackagesView()
         }
