@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2D25E8CC2E9AE35600D232BA /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2D25E8CB2E9AE35600D232BA /* FactoryKit */; };
+		2D25E8CE2E9AE35600D232BA /* FactoryTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 2D25E8CD2E9AE35600D232BA /* FactoryTesting */; };
+		2DA1382B2E9AD5B8006DC9F1 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 2DA1382A2E9AD5B8006DC9F1 /* ComposableArchitecture */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		2D77073E2E9A9B5100E895D8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +35,22 @@
 		2D7707472E9A9B5100E895D8 /* BrewManagerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewManagerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2DCCD7152E9AB0E200B92012 /* Exceptions for "BrewManager" folder in "BrewManager" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 2D77072D2E9A9B5000E895D8 /* BrewManager */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2D7707302E9A9B5000E895D8 /* BrewManager */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2DCCD7152E9AB0E200B92012 /* Exceptions for "BrewManager" folder in "BrewManager" target */,
+			);
 			path = BrewManager;
 			sourceTree = "<group>";
 		};
@@ -52,6 +71,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D25E8CC2E9AE35600D232BA /* FactoryKit in Frameworks */,
+				2DA1382B2E9AD5B8006DC9F1 /* ComposableArchitecture in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D25E8CE2E9AE35600D232BA /* FactoryTesting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +134,8 @@
 			);
 			name = BrewManager;
 			packageProductDependencies = (
+				2DA1382A2E9AD5B8006DC9F1 /* ComposableArchitecture */,
+				2D25E8CB2E9AE35600D232BA /* FactoryKit */,
 			);
 			productName = BrewManager;
 			productReference = 2D77072E2E9A9B5000E895D8 /* BrewManager.app */;
@@ -135,6 +159,7 @@
 			);
 			name = BrewManagerTests;
 			packageProductDependencies = (
+				2D25E8CD2E9AE35600D232BA /* FactoryTesting */,
 			);
 			productName = BrewManagerTests;
 			productReference = 2D77073D2E9A9B5100E895D8 /* BrewManagerTests.xctest */;
@@ -195,6 +220,10 @@
 			);
 			mainGroup = 2D7707252E9A9B5000E895D8;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2DA138292E9AD5B8006DC9F1 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				2D25E8CA2E9AE35600D232BA /* XCRemoteSwiftPackageReference "Factory" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2D77072F2E9A9B5000E895D8 /* Products */;
 			projectDirPath = "";
@@ -398,11 +427,11 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = FK2359ZJ7C;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BrewManager/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -430,11 +459,11 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = FK2359ZJ7C;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BrewManager/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -573,6 +602,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2D25E8CA2E9AE35600D232BA /* XCRemoteSwiftPackageReference "Factory" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hmlongco/Factory";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.3;
+			};
+		};
+		2DA138292E9AD5B8006DC9F1 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.22.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2D25E8CB2E9AE35600D232BA /* FactoryKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D25E8CA2E9AE35600D232BA /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = FactoryKit;
+		};
+		2D25E8CD2E9AE35600D232BA /* FactoryTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D25E8CA2E9AE35600D232BA /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = FactoryTesting;
+		};
+		2DA1382A2E9AD5B8006DC9F1 /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2DA138292E9AD5B8006DC9F1 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2D7707262E9A9B5000E895D8 /* Project object */;
 }
