@@ -18,13 +18,30 @@ struct InstalledPackagesFeature {
     @ObservableState
     struct State: Equatable {
         var installedPackages: [InstalledPackageState] = []
+        var allPackages: [InstalledPackageState] = []
         var status: Status = .idle
+        var sortOrder = [KeyPathComparator(\InstalledPackageState.installedPackage.name)]
+        var searchText: String = ""
+        
+        var filteredPackages: [InstalledPackageState] {
+            if searchText.isEmpty {
+                return installedPackages
+            }
+            return installedPackages.filter {
+                $0.installedPackage.name.lowercased().contains(searchText.lowercased())
+            }
+        }
     }
     
     enum Action: Equatable {
         case fetchInstalledPackages
         case installedPackagesResponse([BrewPackage])
+        case sortChanged([KeyPathComparator<InstalledPackageState>])
+        case searchTextChanged(String)
+        case debouncedSearch
     }
+    
+    @Dependency(\.continuousClock) var clock
     
     
     var body: some Reducer<State, Action> {
@@ -37,14 +54,39 @@ struct InstalledPackagesFeature {
                     await send(.installedPackagesResponse(result))
                 }
             case .installedPackagesResponse(let result):
-                state.installedPackages = result.map { InstalledPackageState(installedPackage: $0) }
-                    .sorted { $0.installedPackage.name.lowercased() < $1.installedPackage.name.lowercased() }
+                let packages = result.map { InstalledPackageState(installedPackage: $0) }
+                state.installedPackages = packages
+                state.allPackages = packages
+                state.installedPackages.sort(using: state.sortOrder)
                 state.status = .success
+                return .none
+                
+            case .sortChanged(let sortOrder):
+                state.sortOrder = sortOrder
+                state.installedPackages.sort(using: sortOrder)
+                return .none
+                
+            case .searchTextChanged(let searchText):
+                state.searchText = searchText
+                return .run { send in
+                    try await self.clock.sleep(for: .milliseconds(500))
+                    await send(.debouncedSearch)
+                }
+                .cancellable(id: "search", cancelInFlight: true)
+                
+            case .debouncedSearch:
+                if state.searchText.isEmpty {
+                    state.installedPackages = state.allPackages
+                } else {
+                    state.installedPackages = state.allPackages.filter {
+                        $0.installedPackage.name.lowercased().contains(state.searchText.lowercased())
+                    }
+                }
+                state.installedPackages.sort(using: state.sortOrder)
                 return .none
             }
         }
     }
-    
 }
 
 struct InstalledPackageState: Equatable, Identifiable {

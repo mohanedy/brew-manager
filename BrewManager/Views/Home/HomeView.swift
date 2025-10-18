@@ -29,12 +29,20 @@ struct HomeView: View {
                 ) {
                     store.send(.updateHomebrewRequested)
                 }
+                .padding([.trailing], 10)
+                CardView(
+                    title: "Installed Casks",
+                    value: "\(store.totalInstalledCasks)",
+                    icon : Image(systemName: "shippingbox.fill")
+                )
+                .padding([.trailing], 10)
+                CardView(
+                    title: "Installed Formulae",
+                    value: "\(store.totalInstalledFormulae)",
+                    icon : Image(systemName: "flask.fill")
+                )
             }
             .padding(.bottom, 20)
-      
-            Text("Installed Formulas & Casks")
-                .font(.title3)
-                .padding(.bottom, 10)
             InstalledPackagesView()
         }
         .task {

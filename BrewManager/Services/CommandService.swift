@@ -21,7 +21,12 @@ class DefaultCommandService: CommandService {
     @discardableResult
     func runCommand(_ arguments: String, path: String) async -> CommandResult {
         return await withCheckedContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self = self else {
+                    return continuation.resume(returning: (output: nil, error: "Service deallocated"))
+                }
+                
+                self.logger.debug("Running command: \(path) \(arguments)")
                 let process = Process()
                 process.executableURL = URL(fileURLWithPath: path)
                 
@@ -60,9 +65,10 @@ class DefaultCommandService: CommandService {
                     
                     let output = String(data: outputData, encoding: .utf8) ?? ""
                     let error = String(data: errorData, encoding: .utf8) ?? ""
-                    
+                    self.logger.debug("Command output: \(output)")
                     continuation.resume(returning: (output: output.isEmpty ? nil : output, error: error.isEmpty ? nil : error))
                 } catch {
+                    self.logger.error("Failed to run command: \(error.localizedDescription)")
                     continuation.resume(returning: (output: nil, error: error.localizedDescription))
                 }
             }

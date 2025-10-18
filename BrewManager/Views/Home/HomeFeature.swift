@@ -23,11 +23,15 @@ struct HomeFeature {
         var updateAlertTitle: String = ""
         var showUpdateAlert: Bool = false
         var updateIsAlreadyUpToDate: Bool = false
+        var totalInstalledCasks: Int = 0
+        var totalInstalledFormulae: Int = 0
     }
     
     enum Action {
         case brewInfoLoaded
-        case brewInfoLoadSuccess(version: String)
+        case brewInfoLoadSuccess(version: String,
+                                 totalInstalledFormulae: Int,
+                                 totalInstalledCasks: Int)
         case updateHomebrewRequested
         case updateHomebrewCompleted(success: Bool, message: String, alreadyUpToDate: Bool)
         case dismissUpdateAlert
@@ -40,10 +44,18 @@ struct HomeFeature {
                 state.status = .loading
                 return .run { send in
                     let version = await self.brewService.getBrewVersion()
-                    await send(.brewInfoLoadSuccess(version: version ?? "Unknown"))
+                    let totalInstalledFormulae = await self.brewService.totalIntalledPackages(type: .formula)
+                    let totalInstalledCasks = await self.brewService.totalIntalledPackages(type: .cask)
+                    await send(.brewInfoLoadSuccess(version: version ?? "Unknown",
+                                                    totalInstalledFormulae: totalInstalledFormulae,
+                                                    totalInstalledCasks: totalInstalledCasks))
                 }
-            case .brewInfoLoadSuccess(version: let version):
+            case .brewInfoLoadSuccess(version: let version,
+                                      totalInstalledFormulae: let totalInstalledFormulae,
+                                        totalInstalledCasks: let totalInstalledCasks):
                 state.brewVersion = version
+                state.totalInstalledFormulae = totalInstalledFormulae
+                state.totalInstalledCasks = totalInstalledCasks
                 state.status = .success
                 return .none
                 

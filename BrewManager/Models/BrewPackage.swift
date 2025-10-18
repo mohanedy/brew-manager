@@ -18,7 +18,11 @@ struct BrewPackage: Identifiable, Codable, Equatable {
 }
 
 
-enum BrewPackageType: String, Codable, Equatable {
+enum BrewPackageType: String, Codable, Equatable, Comparable {
     case formula
     case cask
+    
+    static func < (lhs: BrewPackageType, rhs: BrewPackageType) -> Bool {
+        return lhs.rawValue < rhs.rawValue
+    }
 }

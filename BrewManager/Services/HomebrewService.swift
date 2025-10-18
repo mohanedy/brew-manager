@@ -12,6 +12,8 @@ protocol HomebrewService {
     func getBrewVersion() async -> String?
     func updateHomebrew() async -> (success: Bool, message: String, alreadyUpToDate: Bool)
     func installedFormulas() async -> [BrewPackage]
+    func updatePackage(name: String) async -> Bool
+    func totalIntalledPackages(type: BrewPackageType) async -> Int
     //    func installedPackages() -> [String]
     //    func installPackage(name: String) -> Bool
     //    func uninstallPackage(name: String) -> Bool
@@ -121,4 +123,27 @@ class DefaultHomebrewService: HomebrewService {
         return formulas
     }
     
+    
+    func updatePackage(name: String) async -> Bool {
+        let result = await commandService.runCommand("upgrade \(name)", path: brewPath)
+        
+        if let output = result.output {
+            // Check for successful update
+            if output.contains("Upgraded") || output.contains("upgraded") || result.error == nil || result.error?.isEmpty == true {
+                return true
+            }
+        }
+        return false
+    }
+    
+    func totalIntalledPackages(type: BrewPackageType) async -> Int {
+        let result = await commandService.runCommand("list --\(type == .cask ? "cask" : "formula")", path: brewPath)
+        var count = 0
+        if let output = result.output {
+            let lines = output.split(separator: "\n")
+            count = lines.count
+        }
+        
+        return count
+    }
 }

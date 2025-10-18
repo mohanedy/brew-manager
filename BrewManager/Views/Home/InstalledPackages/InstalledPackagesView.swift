@@ -1,9 +1,9 @@
-//
-//  InstalledPackagesView.swift
-//  BrewManager
-//
-//  Created by Izam on 17/10/2025.
-//
+    //
+    //  InstalledPackagesView.swift
+    //  BrewManager
+    //
+    //  Created by Izam on 17/10/2025.
+    //
 
 import SwiftUI
 import ComposableArchitecture
@@ -13,7 +13,39 @@ struct InstalledPackagesView: View {
     @InjectedObject(\.installedPackagesFeature) private var store: StoreOf<InstalledPackagesFeature>
     
     var body: some View {
-        Table(store.installedPackages) {
+        VStack {
+            HStack(alignment: .firstTextBaseline) {
+                Text("Installed Packages")
+                    .font(.title2)
+                    .bold()
+                Spacer()
+                if store.status == .loading {
+                    ProgressView()
+                        .scaleEffect(0.5)
+                }
+                Button("Refresh", systemImage: "arrow.clockwise") {
+                    store.send(.fetchInstalledPackages)
+                }.disabled(store.status == .loading)
+                
+                
+                Button("Upgrade All", systemImage: "arrow.up.circle") {
+                    store.send(.fetchInstalledPackages)
+                }.disabled(store.status == .loading)
+                
+            }.padding([.bottom], 5)
+            packagesTable()
+                .task {
+                    store.send(.fetchInstalledPackages)
+                }
+        }
+        .searchable(text: $store.searchText.sending(\.searchTextChanged),
+                    prompt: "Search Installed Formulae and Casks")
+    }
+    
+    @ViewBuilder
+    private func packagesTable() -> some View {
+        Table(store.filteredPackages,
+              sortOrder: $store.sortOrder.sending(\.sortChanged)) {
             TableColumn("Name", value: \.installedPackage.name)
             TableColumn("Type", value: \.installedPackage.type.rawValue)
             TableColumn("Version", value: \.installedPackage.version)
@@ -43,7 +75,7 @@ struct InstalledPackagesView: View {
                         if let url = URL(string: formula.homepage ?? "") {
                             NSWorkspace.shared.open(url)
                         }
-                            
+                        
                     } label: {
                         Image(systemName: "safari")
                             .foregroundColor(.blue)
@@ -52,10 +84,8 @@ struct InstalledPackagesView: View {
                 }
             }
         }
-        .task {
-             store.send(.fetchInstalledPackages)
-        }
     }
+    
 }
 
 #Preview {
