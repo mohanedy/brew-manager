@@ -8,9 +8,17 @@
 import SwiftUI
 import SwiftData
 import AppKit
+import Sparkle
 
 @main
 struct BrewManagerApp: App {
+    private let updaterController: SPUStandardUpdaterController
+    
+    init() {
+        updaterController = SPUStandardUpdaterController(startingUpdater: true,
+                                                         updaterDelegate: nil,
+                                                         userDriverDelegate: nil)
+    }
     
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -29,6 +37,12 @@ struct BrewManagerApp: App {
         WindowGroup {
             ContentView()
         }
+        .windowStyle(.hiddenTitleBar)
         .modelContainer(sharedModelContainer)
+        .commands {
+                CommandGroup(after: .appInfo) {
+                    CheckForUpdatesView(updater: updaterController.updater)
+                }
+            }
     }
 }

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2D25E8CC2E9AE35600D232BA /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2D25E8CB2E9AE35600D232BA /* FactoryKit */; };
 		2D25E8CE2E9AE35600D232BA /* FactoryTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 2D25E8CD2E9AE35600D232BA /* FactoryTesting */; };
+		2D292BF42EA3EBEC00ABC886 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 2D292BF32EA3EBEC00ABC886 /* Sparkle */; };
 		2DA1382B2E9AD5B8006DC9F1 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 2DA1382A2E9AD5B8006DC9F1 /* ComposableArchitecture */; };
 /* End PBXBuildFile section */
 
@@ -71,6 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D292BF42EA3EBEC00ABC886 /* Sparkle in Frameworks */,
 				2D25E8CC2E9AE35600D232BA /* FactoryKit in Frameworks */,
 				2DA1382B2E9AD5B8006DC9F1 /* ComposableArchitecture in Frameworks */,
 			);
@@ -136,6 +138,7 @@
 			packageProductDependencies = (
 				2DA1382A2E9AD5B8006DC9F1 /* ComposableArchitecture */,
 				2D25E8CB2E9AE35600D232BA /* FactoryKit */,
+				2D292BF32EA3EBEC00ABC886 /* Sparkle */,
 			);
 			productName = BrewManager;
 			productReference = 2D77072E2E9A9B5000E895D8 /* BrewManager.app */;
@@ -223,6 +226,7 @@
 			packageReferences = (
 				2DA138292E9AD5B8006DC9F1 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 				2D25E8CA2E9AE35600D232BA /* XCRemoteSwiftPackageReference "Factory" */,
+				2D292BF22EA3EBEC00ABC886 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2D77072F2E9A9B5000E895D8 /* Products */;
@@ -618,6 +622,14 @@
 				minimumVersion = 2.5.3;
 			};
 		};
+		2D292BF22EA3EBEC00ABC886 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.8.0;
+			};
+		};
 		2DA138292E9AD5B8006DC9F1 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
@@ -638,6 +650,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2D25E8CA2E9AE35600D232BA /* XCRemoteSwiftPackageReference "Factory" */;
 			productName = FactoryTesting;
+		};
+		2D292BF32EA3EBEC00ABC886 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D292BF22EA3EBEC00ABC886 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 		2DA1382A2E9AD5B8006DC9F1 /* ComposableArchitecture */ = {
 			isa = XCSwiftPackageProductDependency;
