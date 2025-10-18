@@ -29,13 +29,13 @@ struct HomeView: View {
                 ) {
                     store.send(.updateHomebrewRequested)
                 }
-                .padding([.trailing], 10)
+                .padding([.trailing], 5)
                 CardView(
                     title: "Installed Casks",
                     value: "\(store.totalInstalledCasks)",
                     icon : Image(systemName: "shippingbox.fill")
                 )
-                .padding([.trailing], 10)
+                .padding([.trailing], 5)
                 CardView(
                     title: "Installed Formulae",
                     value: "\(store.totalInstalledFormulae)",

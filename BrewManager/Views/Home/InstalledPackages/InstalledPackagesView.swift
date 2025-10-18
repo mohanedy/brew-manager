@@ -56,20 +56,25 @@ struct InstalledPackagesView: View {
                 let formula = packageState.installedPackage
                 HStack {
                     Button {
-                        print("Update \(formula.name) tapped")
+                        store.send(.packageUpdateRequested(packageState))
                     } label: {
                         Image(systemName: "arrow.up.circle")
                     }
+                    .buttonStyle(.borderless)
                     .help("Update Package")
-                    .disabled(formula.latestVersion == nil || formula.latestVersion == formula.version)
+                    .disabled(formula.latestVersion == nil ||
+                              formula.latestVersion == formula.version ||
+                              packageState.status == .loading)
                     
                     Button {
                         print("remove \(formula.name) tapped")
                     } label: {
                         Image(systemName: "trash")
-                            .foregroundColor(.red)
                     }
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(Color(.systemRed))
                     .help("Uninstall Package")
+                    .disabled(packageState.status == .loading)
                     
                     Button {
                         if let url = URL(string: formula.homepage ?? "") {
@@ -78,9 +83,16 @@ struct InstalledPackagesView: View {
                         
                     } label: {
                         Image(systemName: "safari")
-                            .foregroundColor(.blue)
                     }
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(Color(.linkColor))
                     .help("Visit Package Page")
+                    
+                    if packageState.status == .loading {
+                        ProgressView()
+                            .scaleEffect(0.3)
+                            .frame(width: 20, height: 20)
+                    }
                 }
             }
         }

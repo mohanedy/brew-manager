@@ -73,10 +73,7 @@ struct CardView: View {
                 .foregroundStyle(.primary)
                 .padding([.leading, .trailing, .bottom])
         }
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemFill))
-        )
+        .glassEffect(in: .rect(cornerRadius: 16))
         .frame(maxWidth: 200)
         
     }

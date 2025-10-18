@@ -1,9 +1,9 @@
-//
-//  InstalledPackagesFeature.swift
-//  BrewManager
-//
-//  Created by Izam on 17/10/2025.
-//
+    //
+    //  InstalledPackagesFeature.swift
+    //  BrewManager
+    //
+    //  Created by Izam on 17/10/2025.
+    //
 
 import Foundation
 import ComposableArchitecture
@@ -39,6 +39,7 @@ struct InstalledPackagesFeature {
         case sortChanged([KeyPathComparator<InstalledPackageState>])
         case searchTextChanged(String)
         case debouncedSearch
+        case packageUpdateRequested(InstalledPackageState)
     }
     
     @Dependency(\.continuousClock) var clock
@@ -53,6 +54,7 @@ struct InstalledPackagesFeature {
                     let result = await self.brewService.installedFormulas()
                     await send(.installedPackagesResponse(result))
                 }
+                
             case .installedPackagesResponse(let result):
                 let packages = result.map { InstalledPackageState(installedPackage: $0) }
                 state.installedPackages = packages
@@ -84,6 +86,15 @@ struct InstalledPackagesFeature {
                 }
                 state.installedPackages.sort(using: state.sortOrder)
                 return .none
+                
+            case .packageUpdateRequested(let package):
+                let packgeIndex = state.installedPackages.firstIndex(where: { $0.id == package.id })
+                guard let index = packgeIndex else { return .none }
+                state.installedPackages[index].status = .loading
+                return .run { send in
+                    _ = await self.brewService.updatePackage(name: package.installedPackage.name)
+                    await send(.fetchInstalledPackages)
+                }
             }
         }
     }
