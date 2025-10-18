@@ -10,6 +10,10 @@ import ComposableArchitecture
 import FactoryKit
 import SwiftUI
 
+    // TODO: Implement the delete package functionality
+    // TODO: Implement the package details view
+    // TODO: Implement error handling for package updates
+    // TODO: Implement upgrade all packages functionality
 @Reducer
 struct InstalledPackagesFeature {
     
@@ -49,53 +53,81 @@ struct InstalledPackagesFeature {
         Reduce { state, action in
             switch action {
             case .fetchInstalledPackages:
-                state.status = .loading
-                return .run { send in
-                    let result = await self.brewService.installedFormulas()
-                    await send(.installedPackagesResponse(result))
-                }
+                return fetchInstalledPackages(state: &state)
                 
             case .installedPackagesResponse(let result):
-                let packages = result.map { InstalledPackageState(installedPackage: $0) }
-                state.installedPackages = packages
-                state.allPackages = packages
-                state.installedPackages.sort(using: state.sortOrder)
-                state.status = .success
-                return .none
+                return installedPackagesResponse(state: &state, result: result)
                 
             case .sortChanged(let sortOrder):
-                state.sortOrder = sortOrder
-                state.installedPackages.sort(using: sortOrder)
-                return .none
+                return sortChanged(state: &state, sortOrder: sortOrder)
                 
             case .searchTextChanged(let searchText):
-                state.searchText = searchText
-                return .run { send in
-                    try await self.clock.sleep(for: .milliseconds(500))
-                    await send(.debouncedSearch)
-                }
-                .cancellable(id: "search", cancelInFlight: true)
+                return searchTextChanged(state: &state, searchText: searchText)
                 
             case .debouncedSearch:
-                if state.searchText.isEmpty {
-                    state.installedPackages = state.allPackages
-                } else {
-                    state.installedPackages = state.allPackages.filter {
-                        $0.installedPackage.name.lowercased().contains(state.searchText.lowercased())
-                    }
-                }
-                state.installedPackages.sort(using: state.sortOrder)
-                return .none
+                return debouncedSearch(state: &state)
                 
             case .packageUpdateRequested(let package):
-                let packgeIndex = state.installedPackages.firstIndex(where: { $0.id == package.id })
-                guard let index = packgeIndex else { return .none }
-                state.installedPackages[index].status = .loading
-                return .run { send in
-                    _ = await self.brewService.updatePackage(name: package.installedPackage.name)
-                    await send(.fetchInstalledPackages)
-                }
+                return packageUpdateRequested(state: &state, package: package)
             }
+        }
+    }
+    
+        // MARK: - Actions Handlers
+    
+    private func fetchInstalledPackages(state: inout State) -> Effect<Action> {
+        state.status = .loading
+        return .run { send in
+            let result = await self.brewService.installedFormulas()
+            await send(.installedPackagesResponse(result))
+        }
+    }
+    
+    private func installedPackagesResponse(state: inout State,
+                                           result: [BrewPackage])
+    -> Effect<Action> {
+        let packages = result.map { InstalledPackageState(installedPackage: $0) }
+        state.installedPackages = packages
+        state.allPackages = packages
+        state.installedPackages.sort(using: state.sortOrder)
+        state.status = .success
+        return .none
+    }
+    
+    private func sortChanged(state: inout State, sortOrder: [KeyPathComparator<InstalledPackageState>]) -> Effect<Action> {
+        state.sortOrder = sortOrder
+        state.installedPackages.sort(using: sortOrder)
+        return .none
+    }
+    
+    private func searchTextChanged(state: inout State, searchText: String) -> Effect<Action> {
+        state.searchText = searchText
+        return .run { send in
+            try await self.clock.sleep(for: .milliseconds(500))
+            await send(.debouncedSearch)
+        }
+        .cancellable(id: "search", cancelInFlight: true)
+    }
+    
+    private func debouncedSearch(state: inout State) -> Effect<Action> {
+        if state.searchText.isEmpty {
+            state.installedPackages = state.allPackages
+        } else {
+            state.installedPackages = state.allPackages.filter {
+                $0.installedPackage.name.lowercased().contains(state.searchText.lowercased())
+            }
+        }
+        state.installedPackages.sort(using: state.sortOrder)
+        return .none
+    }
+    
+    private func packageUpdateRequested(state: inout State, package: InstalledPackageState) -> Effect<Action> {
+        let packgeIndex = state.installedPackages.firstIndex(where: { $0.id == package.id })
+        guard let index = packgeIndex else { return .none }
+        state.installedPackages[index].status = .loading
+        return .run { send in
+            _ = await self.brewService.updatePackage(name: package.installedPackage.name)
+            await send(.fetchInstalledPackages)
         }
     }
 }
