@@ -53,6 +53,23 @@ struct InstalledPackagesView: View {
             TableColumn("Latest Version" ) { packageState in
                 Text(packageState.installedPackage.latestVersion ?? "N/A")
             }
+            TableColumn("Status") { packageState in
+                HStack(spacing: 4) {
+                    if packageState.status == .loading {
+                        ProgressView()
+                            .scaleEffect(0.3)
+                            .frame(width: 20, height: 20)
+                    }
+                    
+                    if case .success(let action) = packageState.status {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                        Text("Updated")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
             TableColumn("Actions") { packageState in
                 let formula = packageState.installedPackage
                 HStack {
@@ -88,12 +105,6 @@ struct InstalledPackagesView: View {
                     .buttonStyle(.borderless)
                     .foregroundStyle(Color(.linkColor))
                     .help("Visit Package Page")
-                    
-                    if packageState.status == .loading {
-                        ProgressView()
-                            .scaleEffect(0.3)
-                            .frame(width: 20, height: 20)
-                    }
                 }
             }
         }

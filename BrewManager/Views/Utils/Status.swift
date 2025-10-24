@@ -10,6 +10,13 @@ import Foundation
 enum Status: Equatable {
     case idle
     case loading
-    case success
+    case success(_ actionType: ActionType? = nil)
     case failure
+}
+
+enum ActionType {
+    case updated
+    case removed
+    case installed
+    case loaded
 }

@@ -56,7 +56,7 @@ struct HomeFeature {
                 state.brewVersion = version
                 state.totalInstalledFormulae = totalInstalledFormulae
                 state.totalInstalledCasks = totalInstalledCasks
-                state.status = .success
+                state.status = .success()
                 return .none
                 
             case .updateHomebrewRequested:

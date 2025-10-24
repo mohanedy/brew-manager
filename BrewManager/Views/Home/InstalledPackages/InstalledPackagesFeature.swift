@@ -15,6 +15,7 @@ import SwiftUI
 struct InstalledPackagesFeature {
     
     @Injected(\.brewService) var brewService: HomebrewService
+    @Dependency(\.continuousClock) var clock
     
     @ObservableState
     struct State: Equatable {
@@ -42,17 +43,17 @@ struct InstalledPackagesFeature {
         case searchTextChanged(String)
         case debouncedSearch
         case packageUpdateRequested(InstalledPackageState)
+        case packageUpdateCompleted(InstalledPackageState)
         case packageDeleteRequested(InstalledPackageState)
         case alert(PresentationAction<Alert>)
         case updateAllPackagesRequested
+        case packageUpgradeUpdate(BrewUpgradeStatus)
+        case upgradeAllCompleted(Bool)
         
         enum Alert: Equatable {
             case deleteConfirmed(InstalledPackageState)
         }
     }
-    
-    @Dependency(\.continuousClock) var clock
-    
     
     var body: some Reducer<State, Action> {
         Reduce { state, action in
@@ -75,11 +76,20 @@ struct InstalledPackagesFeature {
             case .packageUpdateRequested(let package):
                 return packageUpdateRequested(state: &state, package: package)
                 
+            case .packageUpdateCompleted(let package):
+                return packageUpdateCompleted(state: &state, package: package)
+                
             case .packageDeleteRequested(let package):
                 return onDeletePackageRequested(state: &state, package: package)
                 
             case .updateAllPackagesRequested:
                 return onUpdateAllPackagesRequested(state: &state)
+                
+            case .packageUpgradeUpdate(let update):
+                return onPackageUpgradeUpdate(state: &state, update: update)
+                
+            case .upgradeAllCompleted(let success):
+                return onUpgradeAllCompleted(state: &state, success: success)
                 
             case .alert(.presented(.deleteConfirmed(let package))):
                 return onDeletePackageConfirmed(state: &state, package: package)
@@ -108,7 +118,7 @@ struct InstalledPackagesFeature {
         state.installedPackages = packages
         state.allPackages = packages
         state.installedPackages.sort(using: state.sortOrder)
-        state.status = .success
+        state.status = .success()
         return .none
     }
     
@@ -149,9 +159,20 @@ struct InstalledPackagesFeature {
         guard let index = packageIndex else { return .none }
         state.installedPackages[index].status = .loading
         return .run { send in
-            _ = await self.brewService.updatePackage(name: package.installedPackage.name)
+            _ = await self.brewService.updatePackage(package: package.installedPackage)
+            await send(.packageUpdateCompleted(package))
+            try await self.clock.sleep(for: .seconds(2))
             await send(.fetchInstalledPackages)
         }
+    }
+    
+    private func packageUpdateCompleted(state: inout State,
+                                        package: InstalledPackageState)
+    -> Effect<Action> {
+        let packageIndex = getPackageIndex(state: state, package: package)
+        guard let index = packageIndex else { return .none }
+        state.installedPackages[index].status = .success(.updated)
+        return .none
     }
     
     private func onDeletePackageRequested(state: inout State,
@@ -205,7 +226,45 @@ struct InstalledPackagesFeature {
     -> Effect<Action> {
         state.status = .loading
         return .run { send in
-            _ = await self.brewService.upgradeAllPackages()
+            let success = await self.brewService.upgradeAllPackagesWithStreaming { update in
+                Task { @MainActor in
+                    send(.packageUpgradeUpdate(update))
+                }
+            }
+            await send(.upgradeAllCompleted(success))
+        }
+    }
+    
+    private func onPackageUpgradeUpdate(state: inout State, update: BrewUpgradeStatus)
+    -> Effect<Action> {
+        switch update {
+        case .packageFetching(let name):
+            // Mark package as fetching/loading
+            if let index = state.installedPackages.firstIndex(where: { $0.installedPackage.name == name }) {
+                state.installedPackages[index].status = .loading
+            }
+            
+        case .packageUpgrading(let name, _, _):
+            // Mark package as upgrading
+            if let index = state.installedPackages.firstIndex(where: { $0.installedPackage.name == name }) {
+                state.installedPackages[index].status = .loading
+            }
+            
+        case .packageCompleted(let name):
+            // Mark package as completed
+            if let index = state.installedPackages.firstIndex(where: { $0.installedPackage.name == name }) {
+                state.installedPackages[index].status = .success(.updated)
+            }
+        }
+        
+        return .none
+    }
+    
+    private func onUpgradeAllCompleted(state: inout State, success: Bool)
+    -> Effect<Action> {
+        state.status = success ? .success() : .failure
+        // Refresh the package list to get updated versions
+        return .run { send in
             await send(.fetchInstalledPackages)
         }
     }

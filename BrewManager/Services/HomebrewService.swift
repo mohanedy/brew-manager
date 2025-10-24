@@ -8,14 +8,21 @@
 import Foundation
 import FactoryKit
 
+enum BrewUpgradeStatus: Equatable {
+    case packageFetching(name: String)
+    case packageUpgrading(name: String, fromVersion: String, toVersion: String)
+    case packageCompleted(name: String)
+}
+
 protocol HomebrewService {
     func getBrewVersion() async -> String?
     func updateHomebrew() async -> (success: Bool, message: String, alreadyUpToDate: Bool)
     func installedFormulas() async -> [BrewPackage]
-    func updatePackage(name: String) async -> Bool
+    func updatePackage(package: BrewPackage) async -> Bool
     func totalIntalledPackages(type: BrewPackageType) async -> Int
     func delete(package: BrewPackage) async -> Bool
     func upgradeAllPackages() async -> Bool
+    func upgradeAllPackagesWithStreaming(onUpdate: @escaping (BrewUpgradeStatus) -> Void) async -> Bool
     //    func installedPackages() -> [String]
     //    func installPackage(name: String) -> Bool
     //    func uninstallPackage(name: String) -> Bool
@@ -135,8 +142,9 @@ class DefaultHomebrewService: HomebrewService {
     }
     
     
-    func updatePackage(name: String) async -> Bool {
-        let result = await commandService.runCommand("upgrade \(name)", path: brewPath)
+    func updatePackage(package: BrewPackage) async -> Bool {
+        let result = await commandService.runCommand("upgrade \(package.type == .cask ? package.token! : package.name)",
+                                                     path: brewPath)
         
         if let output = result.output {
             // Check for successful update
@@ -185,5 +193,65 @@ class DefaultHomebrewService: HomebrewService {
             }
         }
         return false
+    }
+    
+    func upgradeAllPackagesWithStreaming(onUpdate: @escaping (BrewUpgradeStatus) -> Void) async -> Bool {
+        var success = true
+        
+        let result = await commandService.runCommandWithStreaming("upgrade", path: brewPath) { output in
+            // Parse the output line by line
+            let lines = output.split(separator: "\n", omittingEmptySubsequences: false)
+            
+            for line in lines {
+                let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+                
+                // Check for fetching phase: "==> Fetching downloads for: ..."
+                if trimmedLine.hasPrefix("==> Fetching") || trimmedLine.contains("Fetching downloads") {
+                    // Extract package names from the line
+                    if let colonIndex = trimmedLine.firstIndex(of: ":") {
+                        let packagesString = trimmedLine[trimmedLine.index(after: colonIndex)...].trimmingCharacters(in: .whitespaces)
+                        let packages = packagesString.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                        if let firstPackage = packages.first {
+                            onUpdate(.packageFetching(name: String(firstPackage)))
+                        }
+                    }
+                }
+                // Check for upgrade phase: "==> Upgrading packagename"
+                else if trimmedLine.hasPrefix("==> Upgrading") {
+                    let components = trimmedLine.split(separator: " ")
+                    if components.count >= 3 {
+                        let packageName = String(components[2])
+                        onUpdate(.packageUpgrading(name: packageName, fromVersion: "", toVersion: ""))
+                    }
+                }
+                // Check for version info line (e.g., "  3.8.1 -> 3.8.2")
+                else if trimmedLine.contains("->") && !trimmedLine.hasPrefix("==>") {
+                    let versionComponents = trimmedLine.split(separator: "->")
+                    if versionComponents.count == 2 {
+                        let fromVersion = versionComponents[0].trimmingCharacters(in: .whitespaces)
+                        let toVersion = versionComponents[1].trimmingCharacters(in: .whitespaces)
+                        // This line appears right after "==> Upgrading packagename"
+                        // We'll need to track the current package being upgraded
+                    }
+                }
+                // Check for completion: "🍺  /opt/homebrew/Cellar/packagename/version"
+                else if trimmedLine.contains("🍺") {
+                    if let cellarRange = trimmedLine.range(of: "/Cellar/") {
+                        let afterCellar = trimmedLine[cellarRange.upperBound...]
+                        let pathComponents = afterCellar.split(separator: "/")
+                        if let packageName = pathComponents.first {
+                            onUpdate(.packageCompleted(name: String(packageName)))
+                        }
+                    }
+                }
+            }
+        }
+        
+        if let error = result.error, !error.isEmpty {
+            print("Error upgrading packages: \(error)")
+            success = false
+        }
+        
+        return success
     }
 }
