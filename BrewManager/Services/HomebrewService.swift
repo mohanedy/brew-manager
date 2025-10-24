@@ -1,9 +1,9 @@
-//
-//  HomebrewServices.swift
-//  BrewManager
-//
-//  Created by Mohaned Yossry on 11/10/2025.
-//
+    //
+    //  HomebrewServices.swift
+    //  BrewManager
+    //
+    //  Created by Mohaned Yossry on 11/10/2025.
+    //
 
 import Foundation
 import FactoryKit
@@ -14,11 +14,12 @@ protocol HomebrewService {
     func installedFormulas() async -> [BrewPackage]
     func updatePackage(name: String) async -> Bool
     func totalIntalledPackages(type: BrewPackageType) async -> Int
-    //    func installedPackages() -> [String]
-    //    func installPackage(name: String) -> Bool
-    //    func uninstallPackage(name: String) -> Bool
-    //    func updatePackage(name: String) -> Bool
-    //    func upgradeAllPackages() -> Bool
+    func delete(package: BrewPackage) async -> Bool
+        //    func installedPackages() -> [String]
+        //    func installPackage(name: String) -> Bool
+        //    func uninstallPackage(name: String) -> Bool
+        //    func updatePackage(name: String) -> Bool
+        //    func upgradeAllPackages() -> Bool
 }
 
 
@@ -35,7 +36,13 @@ class DefaultHomebrewService: HomebrewService {
         if let output = commandResult.output, !output.isEmpty {
             let components = output.split(separator: " ")
             if components.count >= 2 {
-                return String(components[1])
+               let version = String(components[1])
+                
+                if let dashRange = version.range(of: "-") {
+                    return String(version[..<dashRange.lowerBound])
+                }
+                
+                return version
             }
         }
         
@@ -46,18 +53,19 @@ class DefaultHomebrewService: HomebrewService {
         let commandResult = await commandService.runCommand("update", path: brewPath)
         
         if let output = commandResult.output {
-            // Check if already up to date
+                // Check if already up to date
             if output.contains("Already up-to-date") || output.contains("already up to date") {
                 return (true, "Homebrew is already up to date!", true)
             }
             
-            // Check for successful update
-            if output.contains("Updated") || output.contains("updated") || commandResult.error == nil || commandResult.error?.isEmpty == true {
+                // Check for successful update
+            if output.contains("Updated") || output.contains("updated")
+                || commandResult.error == nil || commandResult.error?.isEmpty == true {
                 return (true, "Homebrew updated successfully!", false)
             }
         }
         
-        // Handle errors
+            // Handle errors
         if let error = commandResult.error, !error.isEmpty {
             return (false, "Update failed: \(error)", false)
         }
@@ -66,7 +74,8 @@ class DefaultHomebrewService: HomebrewService {
     }
     
     func installedFormulas() async -> [BrewPackage] {
-        let result = await commandService.runCommand("info --json=v2 --installed", path: brewPath)
+        let result = await commandService.runCommand("info --json=v2 --installed",
+                                                     path: brewPath)
         var formulas: [BrewPackage] = []
         
         guard let output = result.output, !output.isEmpty else {
@@ -80,7 +89,8 @@ class DefaultHomebrewService: HomebrewService {
         
         let decoder = JSONDecoder()
         do{
-            let brewInfo = try decoder.decode(BrewInfoResponse.self, from: Data(output.utf8))
+            let brewInfo = try decoder.decode(BrewInfoResponse.self,
+                                              from: Data(output.utf8))
             for formulaInfo in brewInfo.formulae {
                 if let name = formulaInfo.name,
                    let stableVersion = formulaInfo.versions.stable,
@@ -128,8 +138,9 @@ class DefaultHomebrewService: HomebrewService {
         let result = await commandService.runCommand("upgrade \(name)", path: brewPath)
         
         if let output = result.output {
-            // Check for successful update
-            if output.contains("Upgraded") || output.contains("upgraded") || result.error == nil || result.error?.isEmpty == true {
+                // Check for successful update
+            if output.contains("Upgraded") || output.contains("upgraded")
+                || result.error == nil || result.error?.isEmpty == true {
                 return true
             }
         }
@@ -137,7 +148,8 @@ class DefaultHomebrewService: HomebrewService {
     }
     
     func totalIntalledPackages(type: BrewPackageType) async -> Int {
-        let result = await commandService.runCommand("list --\(type == .cask ? "cask" : "formula")", path: brewPath)
+        let result = await commandService
+            .runCommand("list --\(type == .cask ? "cask" : "formula")", path: brewPath)
         var count = 0
         if let output = result.output {
             let lines = output.split(separator: "\n")
@@ -145,5 +157,19 @@ class DefaultHomebrewService: HomebrewService {
         }
         
         return count
+    }
+    
+    func delete(package: BrewPackage) async -> Bool {
+        let command = package.type == .cask ? "uninstall --cask \(package.name)" : "uninstall \(package.name)"
+        let result = await commandService.runCommand(command, path: brewPath)
+        
+        if let output = result.output {
+            if output.contains("Uninstalled") || output.contains("uninstalled")
+                || result.error == nil || result.error?.isEmpty == true {
+                return true
+            }
+        }
+        
+        return false
     }
 }
