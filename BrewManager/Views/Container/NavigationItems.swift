@@ -12,24 +12,36 @@ import FactoryKit
 
 enum NavigationItems: CaseIterable {
     case home
+    case discover
+    case about
+    case settings
     
     var title: String {
         switch self {
         case .home:
             return "Home"
+        case .discover:
+            return "Discover"
+        case .about:
+            return "About"
+        case .settings:
+            return "Settings"
         }
     }
     var systemImageName: String {
         switch self {
         case .home:
             return "house.fill"
+        case .discover:
+            return "magnifyingglass"
+        case .about:
+            return "info.circle.fill"
+        case .settings:
+            return "gearshape.fill"
         }
     }
     
-    var view: some View {
-        switch self {
-        case .home:
-            HomeView()
-        }
+    static var mainNavigationItems: [NavigationItems] {
+        return [.home, .discover]
     }
 }

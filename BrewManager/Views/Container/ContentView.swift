@@ -16,7 +16,7 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             List(selection: $selectedItem) {
-                ForEach(NavigationItems.allCases , id: \.title) { item in
+                ForEach(NavigationItems.mainNavigationItems, id: \.title) { item in
                     NavigationLink(value: item) {
                         HStack {
                             if !item.systemImageName.isEmpty {
@@ -26,14 +26,33 @@ struct ContentView: View {
                         }
                     }
                 }
-                
+                Divider()
+                NavigationLink(value: NavigationItems.about) {
+                    HStack {
+                        Image(systemName: NavigationItems.about.systemImageName)
+                        Text(NavigationItems.about.title)
+                    }
+                }
             }
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
         } detail: {
-            selectedItem.view
+            detailView()
                 .padding()
         }
-        
+    }
+    
+    @ViewBuilder
+    private func detailView() -> some View {
+        switch selectedItem {
+        case .home:
+            HomeView()
+        case .discover:
+            DiscoverView()
+        case .about:
+            AboutView()
+        case .settings:
+            Text("Settings View" )
+        }
     }
 }
 
