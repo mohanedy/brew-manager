@@ -1,9 +1,9 @@
-    //
-    //  InstalledPackagesView.swift
-    //  BrewManager
-    //
-    //  Created by Izam on 17/10/2025.
-    //
+//
+//  InstalledPackagesView.swift
+//  BrewManager
+//
+//  Created by Izam on 17/10/2025.
+//
 
 import SwiftUI
 import ComposableArchitecture
@@ -29,7 +29,7 @@ struct InstalledPackagesView: View {
                 
                 
                 Button("Upgrade All", systemImage: "arrow.up.circle") {
-                    store.send(.fetchInstalledPackages)
+                    store.send(.updateAllPackagesRequested)
                 }.disabled(store.status == .loading)
                 
             }.padding([.bottom], 5)
@@ -38,6 +38,7 @@ struct InstalledPackagesView: View {
                     store.send(.fetchInstalledPackages)
                 }
         }
+        .alert($store.scope(state: \.alert, action: \.alert))
         .searchable(text: $store.searchText.sending(\.searchTextChanged),
                     prompt: "Search Installed Formulae and Casks")
     }
@@ -67,7 +68,7 @@ struct InstalledPackagesView: View {
                               packageState.status == .loading)
                     
                     Button {
-                        print("remove \(formula.name) tapped")
+                        store.send(.packageDeleteRequested(packageState))
                     } label: {
                         Image(systemName: "trash")
                     }

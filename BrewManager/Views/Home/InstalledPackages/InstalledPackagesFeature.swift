@@ -1,19 +1,16 @@
-    //
-    //  InstalledPackagesFeature.swift
-    //  BrewManager
-    //
-    //  Created by Izam on 17/10/2025.
-    //
+//
+//  InstalledPackagesFeature.swift
+//  BrewManager
+//
+//  Created by Izam on 17/10/2025.
+//
 
 import Foundation
 import ComposableArchitecture
 import FactoryKit
 import SwiftUI
 
-    // TODO: Implement the delete package functionality
-    // TODO: Implement the package details view
-    // TODO: Implement error handling for package updates
-    // TODO: Implement upgrade all packages functionality
+
 @Reducer
 struct InstalledPackagesFeature {
     
@@ -35,6 +32,7 @@ struct InstalledPackagesFeature {
                 $0.installedPackage.name.lowercased().contains(searchText.lowercased())
             }
         }
+        @Presents var alert: AlertState<Action.Alert>?
     }
     
     enum Action: Equatable {
@@ -44,6 +42,13 @@ struct InstalledPackagesFeature {
         case searchTextChanged(String)
         case debouncedSearch
         case packageUpdateRequested(InstalledPackageState)
+        case packageDeleteRequested(InstalledPackageState)
+        case alert(PresentationAction<Alert>)
+        case updateAllPackagesRequested
+        
+        enum Alert: Equatable {
+            case deleteConfirmed(InstalledPackageState)
+        }
     }
     
     @Dependency(\.continuousClock) var clock
@@ -69,11 +74,24 @@ struct InstalledPackagesFeature {
                 
             case .packageUpdateRequested(let package):
                 return packageUpdateRequested(state: &state, package: package)
+                
+            case .packageDeleteRequested(let package):
+                return onDeletePackageRequested(state: &state, package: package)
+                
+            case .updateAllPackagesRequested:
+                return onUpdateAllPackagesRequested(state: &state)
+                
+            case .alert(.presented(.deleteConfirmed(let package))):
+                return onDeletePackageConfirmed(state: &state, package: package)
+                
+            case .alert:
+                return .none
             }
         }
+        .ifLet(\.$alert, action: \.alert)
     }
     
-        // MARK: - Actions Handlers
+    // MARK: - Actions Handlers
     
     private func fetchInstalledPackages(state: inout State) -> Effect<Action> {
         state.status = .loading
@@ -94,13 +112,16 @@ struct InstalledPackagesFeature {
         return .none
     }
     
-    private func sortChanged(state: inout State, sortOrder: [KeyPathComparator<InstalledPackageState>]) -> Effect<Action> {
+    private func sortChanged(state: inout State,
+                             sortOrder: [KeyPathComparator<InstalledPackageState>])
+    -> Effect<Action> {
         state.sortOrder = sortOrder
         state.installedPackages.sort(using: sortOrder)
         return .none
     }
     
-    private func searchTextChanged(state: inout State, searchText: String) -> Effect<Action> {
+    private func searchTextChanged(state: inout State, searchText: String)
+    -> Effect<Action> {
         state.searchText = searchText
         return .run { send in
             try await self.clock.sleep(for: .milliseconds(500))
@@ -121,15 +142,74 @@ struct InstalledPackagesFeature {
         return .none
     }
     
-    private func packageUpdateRequested(state: inout State, package: InstalledPackageState) -> Effect<Action> {
-        let packgeIndex = state.installedPackages.firstIndex(where: { $0.id == package.id })
-        guard let index = packgeIndex else { return .none }
+    private func packageUpdateRequested(state: inout State,
+                                        package: InstalledPackageState)
+    -> Effect<Action> {
+        let packageIndex = getPackageIndex(state: state, package: package)
+        guard let index = packageIndex else { return .none }
         state.installedPackages[index].status = .loading
         return .run { send in
             _ = await self.brewService.updatePackage(name: package.installedPackage.name)
             await send(.fetchInstalledPackages)
         }
     }
+    
+    private func onDeletePackageRequested(state: inout State,
+                                          package: InstalledPackageState)
+    -> Effect<Action> {
+        state.alert = AlertState(
+            title: {
+                TextState("Confirm Uninstall")
+            },
+            actions: {
+                ButtonState<Action.Alert>(
+                    role: .destructive,
+                    action: .deleteConfirmed(package),
+                    label: {
+                        TextState("Uninstall")
+                    })
+                
+                ButtonState<Action.Alert>(
+                    role: .cancel,
+                    label: {
+                        TextState("Cancel")
+                    })
+                
+            },
+            message: {
+                TextState("Are you sure you want to uninstall \(package.installedPackage.name)?")
+            }
+        )
+        
+        return .none
+    }
+    
+    private func onDeletePackageConfirmed(state: inout State,
+                                          package: InstalledPackageState)
+    -> Effect<Action> {
+        let packageIndex = getPackageIndex(state: state, package: package)
+        guard let index = packageIndex else { return .none }
+        state.installedPackages[index].status = .loading
+        return .run { send in
+            _ = await self.brewService.delete(package: package.installedPackage)
+            await send(.fetchInstalledPackages)
+        }
+    }
+    
+    private func getPackageIndex(state: State,
+                                 package: InstalledPackageState) -> Int? {
+        return state.installedPackages.firstIndex(where: { $0.id == package.id })
+    }
+    
+    private func onUpdateAllPackagesRequested(state: inout State)
+    -> Effect<Action> {
+        state.status = .loading
+        return .run { send in
+            _ = await self.brewService.upgradeAllPackages()
+            await send(.fetchInstalledPackages)
+        }
+    }
+    
 }
 
 struct InstalledPackageState: Equatable, Identifiable {

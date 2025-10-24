@@ -65,7 +65,8 @@ class DefaultCommandService: CommandService {
                     
                     let output = String(data: outputData, encoding: .utf8) ?? ""
                     let error = String(data: errorData, encoding: .utf8) ?? ""
-                    self.logger.debug("Command output: \(output)")
+                    
+                    self.logger.debug("Command output: \(output.prefix(500))")
                     continuation.resume(returning: (output: output.isEmpty ? nil : output, error: error.isEmpty ? nil : error))
                 } catch {
                     self.logger.error("Failed to run command: \(error.localizedDescription)")
