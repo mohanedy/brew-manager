@@ -240,19 +240,22 @@ struct InstalledPackagesFeature {
         switch update {
         case .packageFetching(let name):
             // Mark package as fetching/loading
-            if let index = state.installedPackages.firstIndex(where: { $0.installedPackage.name == name }) {
+            if let index = state.installedPackages
+                .firstIndex(where: { $0.installedPackage.name == name }) {
                 state.installedPackages[index].status = .loading
             }
             
         case .packageUpgrading(let name, _, _):
             // Mark package as upgrading
-            if let index = state.installedPackages.firstIndex(where: { $0.installedPackage.name == name }) {
+            if let index = state.installedPackages
+                .firstIndex(where: { $0.installedPackage.name == name }) {
                 state.installedPackages[index].status = .loading
             }
             
         case .packageCompleted(let name):
             // Mark package as completed
-            if let index = state.installedPackages.firstIndex(where: { $0.installedPackage.name == name }) {
+            if let index = state.installedPackages
+                .firstIndex(where: { $0.installedPackage.name == name }) {
                 state.installedPackages[index].status = .success(.updated)
             }
         }

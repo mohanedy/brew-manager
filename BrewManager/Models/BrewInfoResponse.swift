@@ -17,6 +17,8 @@ struct BrewFormulaInfo: Codable {
     let versions: BrewVersions
     let installed: [BrewInstalledVersion]
     let homepage: String?
+    let desc: String?
+    let tap: String?
 }
 
 struct BrewVersions: Codable {
@@ -34,5 +36,6 @@ struct BrewCaskInfo: Codable {
     let installed: String?
     let version: String?
     let desc: String?
+    let tap: String?
 }
     

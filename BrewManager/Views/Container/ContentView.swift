@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import AppKit
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -36,9 +37,11 @@ struct ContentView: View {
             }
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
         } detail: {
-            detailView()
-                .padding()
+            NavigationStack {
+                    detailView()
+            }
         }
+        .background(WindowAccessor())
     }
     
     @ViewBuilder
@@ -52,6 +55,24 @@ struct ContentView: View {
             AboutView()
         case .settings:
             Text("Settings View" )
+        }
+    }
+}
+
+struct WindowAccessor: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            if let window = view.window {
+                window.isOpaque = false
+            }
+        }
+        return view
+    }
+    
+    func updateNSView(_ nsView: NSView, context: Context) {
+        if let window = nsView.window {
+            window.isOpaque = false
         }
     }
 }

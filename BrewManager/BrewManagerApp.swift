@@ -37,7 +37,6 @@ struct BrewManagerApp: App {
         WindowGroup {
             ContentView()
         }
-        .windowStyle(.hiddenTitleBar)
         .modelContainer(sharedModelContainer)
         .commands {
                 CommandGroup(after: .appInfo) {

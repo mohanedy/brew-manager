@@ -17,8 +17,20 @@ extension Container {
     }
     
     @MainActor
+    var networkService: Factory<NetworkService> {
+        self { @MainActor in DefaultNetworkService() }
+            .singleton
+    }
+    
+    @MainActor
     var brewService: Factory<HomebrewService> {
         self { @MainActor in DefaultHomebrewService() }
+            .singleton
+    }
+    
+    @MainActor
+    var brewSearchService: Factory<HomebrewSearchService> {
+        self { @MainActor in DefaultHomebrewSearchService() }
             .singleton
     }
     
@@ -36,6 +48,15 @@ extension Container {
         self { @MainActor in
             Store(initialState: InstalledPackagesFeature.State()) {
                 InstalledPackagesFeature()
+            }
+        }
+    }
+    
+    @MainActor
+    var discoverFeature: Factory<StoreOf<DiscoverFeature>> {
+        self { @MainActor in
+            Store(initialState: DiscoverFeature.State()) {
+                DiscoverFeature()
             }
         }
     }

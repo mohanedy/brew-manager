@@ -100,39 +100,13 @@ class DefaultHomebrewService: HomebrewService {
             let brewInfo = try decoder.decode(BrewInfoResponse.self,
                                               from: Data(output.utf8))
             for formulaInfo in brewInfo.formulae {
-                if let name = formulaInfo.name,
-                   let stableVersion = formulaInfo.versions.stable,
-                   let homepage = formulaInfo.homepage,
-                   let installedVersion = formulaInfo.installed.first?.version {
-                    let formula = BrewPackage(
-                        name: name,
-                        token: nil,
-                        version: installedVersion,
-                        latestVersion: stableVersion,
-                        homepage: homepage,
-                        type: .formula
-                    )
-                    formulas.append(formula)
-                }
-                
+                let formula = BrewPackage(fromFormula: formulaInfo)
+                formulas.append(formula)
             }
             
             for caskInfo in brewInfo.casks {
-                if let token = caskInfo.token,
-                   let name = caskInfo.name?.first ?? caskInfo.token,
-                   let homepage = caskInfo.homepage,
-                   let installedVersion = caskInfo.installed,
-                   let version = caskInfo.version {
-                    let cask = BrewPackage(
-                        name: name,
-                        token: token,
-                        version: installedVersion,
-                        latestVersion: version,
-                        homepage: homepage,
-                        type: .cask
-                    )
-                    formulas.append(cask)
-                }
+                let cask = BrewPackage(fromCask: caskInfo)
+                formulas.append(cask)
             }
         } catch {
             print("Error decoding BrewInfoResponse: \(error)")
@@ -222,16 +196,6 @@ class DefaultHomebrewService: HomebrewService {
                     if components.count >= 3 {
                         let packageName = String(components[2])
                         onUpdate(.packageUpgrading(name: packageName, fromVersion: "", toVersion: ""))
-                    }
-                }
-                // Check for version info line (e.g., "  3.8.1 -> 3.8.2")
-                else if trimmedLine.contains("->") && !trimmedLine.hasPrefix("==>") {
-                    let versionComponents = trimmedLine.split(separator: "->")
-                    if versionComponents.count == 2 {
-                        let fromVersion = versionComponents[0].trimmingCharacters(in: .whitespaces)
-                        let toVersion = versionComponents[1].trimmingCharacters(in: .whitespaces)
-                        // This line appears right after "==> Upgrading packagename"
-                        // We'll need to track the current package being upgraded
                     }
                 }
                 // Check for completion: "🍺  /opt/homebrew/Cellar/packagename/version"

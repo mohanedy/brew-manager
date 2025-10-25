@@ -64,10 +64,20 @@ struct InstalledPackagesView: View {
                     if case .success(let action) = packageState.status {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(.green)
-                        Text("Updated")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        switch action {
+                        case .updated:
+                            Text("Updated")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        case .removed:
+                            Text("Uninstalled")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        default:
+                            EmptyView()
+                        }
                     }
+                    
                 }
             }
             TableColumn("Actions") { packageState in
@@ -81,7 +91,8 @@ struct InstalledPackagesView: View {
                     .buttonStyle(.borderless)
                     .help("Update Package")
                     .disabled(formula.latestVersion == nil ||
-                              formula.latestVersion == formula.version ||
+                              formula.latestVersion == formula.version
+                        .components(separatedBy: "_")[0] ||
                               packageState.status == .loading)
                     
                     Button {

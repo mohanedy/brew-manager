@@ -45,8 +45,9 @@ struct HomeView: View {
             .padding(.bottom, 20)
             InstalledPackagesView()
         }
+        .padding()
         .task {
-            store.send(.brewInfoLoaded)
+            await store.send(.brewInfoLoaded).finish()
         }
         .alert(
             store.updateAlertTitle,
