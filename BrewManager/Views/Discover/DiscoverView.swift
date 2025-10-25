@@ -13,7 +13,7 @@ struct DiscoverView: View {
     @InjectedObject(\.discoverFeature) private var store: StoreOf<DiscoverFeature>
     
     private var columns: [GridItem] = [
-        GridItem(.adaptive(minimum: 200), spacing: 16),
+        GridItem(.adaptive(minimum: 200), spacing: 20),
     ]
     
     

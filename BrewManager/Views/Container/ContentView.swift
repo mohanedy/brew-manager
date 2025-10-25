@@ -6,11 +6,9 @@
 //
 
 import SwiftUI
-import SwiftData
 import AppKit
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
     @State private var selectedItem: NavigationItems = .home
     
     
@@ -79,5 +77,4 @@ struct WindowAccessor: NSViewRepresentable {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }

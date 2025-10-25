@@ -47,6 +47,9 @@ struct HomeView: View {
         }
         .padding()
         .task {
+            if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+                return
+            }
             await store.send(.brewInfoLoaded).finish()
         }
         .alert(

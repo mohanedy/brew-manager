@@ -16,7 +16,7 @@ final class DefaultHomebrewSearchService: HomebrewSearchService {
     
     init() {}
     
-    @Injected(\.commandService) private var commandService: CommandService
+    @Injected(\.brewService) private var brewService: HomebrewService
     @Injected(\.networkService) private var networkService: NetworkService
     
     let formulaeURL = URL(string: "https://formulae.brew.sh/api/formula.json")!
@@ -28,13 +28,22 @@ final class DefaultHomebrewSearchService: HomebrewSearchService {
         do  {
             if fullPackages.isEmpty {
                 fullPackages = try await withThrowingTaskGroup(of: [BrewPackage].self) { taskGroup in
+                    let installedPackages = await brewService.installedFormulas()
                     taskGroup.addTask {
                         let formulaeData = try await self.networkService
                             .fetchData(from: self.formulaeURL)
                         let formulae = try JSONDecoder()
                             .decode([BrewFormulaInfo].self, from: formulaeData)
                         return await MainActor.run {
-                            formulae.map { BrewPackage(fromFormula: $0) }
+                            formulae.map {
+                                var brewPackage = BrewPackage(fromFormula: $0)
+                                if let installedPackage = installedPackages
+                                    .first(where: { $0.name == brewPackage.name }) {
+                                    brewPackage.version = installedPackage.version
+                                }
+                                
+                                return brewPackage
+                            }
                         }
                     }
                     taskGroup.addTask {
@@ -43,7 +52,14 @@ final class DefaultHomebrewSearchService: HomebrewSearchService {
                         let casks = try JSONDecoder()
                             .decode([BrewCaskInfo].self, from: casksData)
                         return await MainActor.run {
-                            casks.map { BrewPackage(fromCask: $0) }
+                            casks.map {
+                                var brewPackage = BrewPackage(fromCask: $0)
+                                if let installedPackage = installedPackages
+                                    .first(where: { $0.name == brewPackage.name }) {
+                                    brewPackage.version = installedPackage.version
+                                }
+                                return brewPackage
+                            }
                         }
                     }
                     

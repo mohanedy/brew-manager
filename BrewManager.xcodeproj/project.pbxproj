@@ -21,19 +21,11 @@
 			remoteGlobalIDString = 2D77072D2E9A9B5000E895D8;
 			remoteInfo = BrewManager;
 		};
-		2D7707482E9A9B5100E895D8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 2D7707262E9A9B5000E895D8 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 2D77072D2E9A9B5000E895D8;
-			remoteInfo = BrewManager;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		2D77072E2E9A9B5000E895D8 /* BrewManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BrewManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D77073D2E9A9B5100E895D8 /* BrewManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		2D7707472E9A9B5100E895D8 /* BrewManagerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewManagerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -60,11 +52,6 @@
 			path = BrewManagerTests;
 			sourceTree = "<group>";
 		};
-		2D77074A2E9A9B5100E895D8 /* BrewManagerUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = BrewManagerUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,13 +73,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		2D7707442E9A9B5100E895D8 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -101,7 +81,6 @@
 			children = (
 				2D7707302E9A9B5000E895D8 /* BrewManager */,
 				2D7707402E9A9B5100E895D8 /* BrewManagerTests */,
-				2D77074A2E9A9B5100E895D8 /* BrewManagerUITests */,
 				2D77072F2E9A9B5000E895D8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -111,7 +90,6 @@
 			children = (
 				2D77072E2E9A9B5000E895D8 /* BrewManager.app */,
 				2D77073D2E9A9B5100E895D8 /* BrewManagerTests.xctest */,
-				2D7707472E9A9B5100E895D8 /* BrewManagerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -168,29 +146,6 @@
 			productReference = 2D77073D2E9A9B5100E895D8 /* BrewManagerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		2D7707462E9A9B5100E895D8 /* BrewManagerUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 2D7707572E9A9B5100E895D8 /* Build configuration list for PBXNativeTarget "BrewManagerUITests" */;
-			buildPhases = (
-				2D7707432E9A9B5100E895D8 /* Sources */,
-				2D7707442E9A9B5100E895D8 /* Frameworks */,
-				2D7707452E9A9B5100E895D8 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				2D7707492E9A9B5100E895D8 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				2D77074A2E9A9B5100E895D8 /* BrewManagerUITests */,
-			);
-			name = BrewManagerUITests;
-			packageProductDependencies = (
-			);
-			productName = BrewManagerUITests;
-			productReference = 2D7707472E9A9B5100E895D8 /* BrewManagerUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -205,10 +160,6 @@
 						CreatedOnToolsVersion = 26.0.1;
 					};
 					2D77073C2E9A9B5100E895D8 = {
-						CreatedOnToolsVersion = 26.0.1;
-						TestTargetID = 2D77072D2E9A9B5000E895D8;
-					};
-					2D7707462E9A9B5100E895D8 = {
 						CreatedOnToolsVersion = 26.0.1;
 						TestTargetID = 2D77072D2E9A9B5000E895D8;
 					};
@@ -235,7 +186,6 @@
 			targets = (
 				2D77072D2E9A9B5000E895D8 /* BrewManager */,
 				2D77073C2E9A9B5100E895D8 /* BrewManagerTests */,
-				2D7707462E9A9B5100E895D8 /* BrewManagerUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -249,13 +199,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2D77073B2E9A9B5100E895D8 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2D7707452E9A9B5100E895D8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -279,13 +222,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		2D7707432E9A9B5100E895D8 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -293,11 +229,6 @@
 			isa = PBXTargetDependency;
 			target = 2D77072D2E9A9B5000E895D8 /* BrewManager */;
 			targetProxy = 2D77073E2E9A9B5100E895D8 /* PBXContainerItemProxy */;
-		};
-		2D7707492E9A9B5100E895D8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 2D77072D2E9A9B5000E895D8 /* BrewManager */;
-			targetProxy = 2D7707482E9A9B5100E895D8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -534,44 +465,6 @@
 			};
 			name = Release;
 		};
-		2D7707582E9A9B5100E895D8 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = FK2359ZJ7C;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.mohanedy.BrewManagerUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = BrewManager;
-			};
-			name = Debug;
-		};
-		2D7707592E9A9B5100E895D8 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = FK2359ZJ7C;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.mohanedy.BrewManagerUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = BrewManager;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -598,15 +491,6 @@
 			buildConfigurations = (
 				2D7707552E9A9B5100E895D8 /* Debug */,
 				2D7707562E9A9B5100E895D8 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		2D7707572E9A9B5100E895D8 /* Build configuration list for PBXNativeTarget "BrewManagerUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				2D7707582E9A9B5100E895D8 /* Debug */,
-				2D7707592E9A9B5100E895D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

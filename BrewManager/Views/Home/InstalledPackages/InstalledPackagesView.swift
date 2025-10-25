@@ -35,7 +35,10 @@ struct InstalledPackagesView: View {
             }.padding([.bottom], 5)
             packagesTable()
                 .task {
-                    store.send(.fetchInstalledPackages)
+                    if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+                        return
+                    }
+                    await store.send(.fetchInstalledPackages).finish()
                 }
         }
         .alert($store.scope(state: \.alert, action: \.alert))
@@ -49,7 +52,9 @@ struct InstalledPackagesView: View {
               sortOrder: $store.sortOrder.sending(\.sortChanged)) {
             TableColumn("Name", value: \.installedPackage.name)
             TableColumn("Type", value: \.installedPackage.type.rawValue)
-            TableColumn("Version", value: \.installedPackage.version)
+            TableColumn("Version") { packageState in
+                Text(packageState.installedPackage.version ?? "N/A")
+            }
             TableColumn("Latest Version" ) { packageState in
                 Text(packageState.installedPackage.latestVersion ?? "N/A")
             }
@@ -91,8 +96,7 @@ struct InstalledPackagesView: View {
                     .buttonStyle(.borderless)
                     .help("Update Package")
                     .disabled(formula.latestVersion == nil ||
-                              formula.latestVersion == formula.version
-                        .components(separatedBy: "_")[0] ||
+                              formula.latestVersion == formula.version?.components(separatedBy: "_")[0] ||
                               packageState.status == .loading)
                     
                     Button {

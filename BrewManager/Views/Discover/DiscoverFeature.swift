@@ -9,6 +9,7 @@ import Foundation
 import ComposableArchitecture
 import FactoryKit
 
+
 @Reducer
 struct DiscoverFeature {
     @Injected(\.brewSearchService) var brewService: HomebrewSearchService
