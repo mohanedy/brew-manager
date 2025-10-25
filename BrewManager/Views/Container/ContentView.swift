@@ -35,9 +35,7 @@ struct ContentView: View {
             }
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
         } detail: {
-            NavigationStack {
-                    detailView()
-            }
+            detailView()
         }
         .background(WindowAccessor())
     }
@@ -45,14 +43,14 @@ struct ContentView: View {
     @ViewBuilder
     private func detailView() -> some View {
         switch selectedItem {
-        case .home:
-            HomeView()
-        case .discover:
-            DiscoverView()
-        case .about:
-            AboutView()
-        case .settings:
-            Text("Settings View" )
+            case .home:
+                HomeView()
+            case .discover:
+                DiscoverView()
+            case .about:
+                AboutView()
+            case .settings:
+                Text("Settings View" )
         }
     }
 }
