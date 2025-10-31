@@ -19,60 +19,106 @@ struct DiscoverView: View {
     
     var body: some View {
         ScrollView {
-            VStack {
-                if store.status == .idle {
-                    Spacer()
-                    Text("Start typing to search for Formulae and Casks")
-                        .foregroundStyle(.secondary)
-                        .padding()
-                    Spacer()
-                } else if store.status == .loading {
-                    Spacer()
-                    ProgressView()
-                        .scaleEffect(1)
-                        .padding()
-                    Spacer()
-                } else if store.status == .success() && store.searchResults.isEmpty {
-                    Spacer()
-                    Text("No results found")
-                        .foregroundStyle(.secondary)
-                        .padding()
-                    Spacer()
-                } else {
-                    LazyVGrid(
-                        columns: columns,
-                        alignment: .center,
-                        spacing: 16,
-                    ) {
-                        if !store.formulaeResults.isEmpty {
-                            Section {
-                                ForEach(store.formulaeResults) { item in
-                                    PackageCardView(package: item)
-                                }
-                            } header: {
-                                section(title: "Formulae")
-                            }
-                        }
-                        if !store.caskResults.isEmpty {
-                            Section {
-                                ForEach(store.caskResults) { item in
-                                    PackageCardView(package: item)
-                                }
-                            } header: {
-                                section(title: "Casks")
-                            }
-                        }
-                    }
-                    .padding()
-                }
-            }
+            contentView
         }
         .navigationTitle("Discover")
         .background(.clear)
-        .searchable(text: $store.searchQuery.sending(\.searchQueryChanged),
-                    prompt: "Search Formulae and Casks")
+        .searchable(
+            text: $store.searchQuery.sending(\.searchQueryChanged),
+            prompt: "Search Formulae and Casks",
+        )
+        .toolbar {
+            ToolbarItem(placement: .automatic) {
+                Picker("Filter", selection: $store.selectedFilter.sending(\.filterChanged)) {
+                    ForEach(PackageFilter.allCases, id: \.self) { filter in
+                        Text(filter.rawValue).tag(filter)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+        }
+        .alert($store.scope(state: \.alert, action: \.alert))
     }
-
+    
+    @ViewBuilder
+    private var contentView: some View {
+        VStack {
+            if store.status == .idle {
+                idleStateView
+            } else if store.status == .loading {
+                loadingStateView
+            } else if store.status == .success() && store.searchResults.isEmpty {
+                noResultsView
+            } else {
+                resultsGridView
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var idleStateView: some View {
+        Spacer()
+        Text("Start typing to search for Formulae and Casks")
+            .foregroundStyle(.secondary)
+            .padding()
+        Spacer()
+    }
+    
+    @ViewBuilder
+    private var loadingStateView: some View {
+        Spacer()
+        ProgressView()
+            .scaleEffect(1)
+            .padding()
+        Spacer()
+    }
+    
+    @ViewBuilder
+    private var noResultsView: some View {
+        Spacer()
+        Text("No results found")
+            .foregroundStyle(.secondary)
+            .padding()
+        Spacer()
+    }
+    
+    @ViewBuilder
+    private var resultsGridView: some View {
+        LazyVGrid(
+            columns: columns,
+            alignment: .center,
+            spacing: 16
+        ) {
+            if !store.formulaeResults.isEmpty && (store.selectedFilter != .casks || store.selectedFilter == .all) {
+                Section {
+                    ForEach(store.formulaeResults) { item in
+                        PackageCardView(
+                            packageState: item
+                        ) { forceInstall in
+                            installPackage(item.package, forceInstall: forceInstall)
+                        }
+                    }
+                } header: {
+                    section(title: "Formulae")
+                }
+            }
+            if !store.caskResults.isEmpty && (store.selectedFilter != .formulae || store.selectedFilter == .all) {
+                Section {
+                    ForEach(store.caskResults) { item in
+                        PackageCardView(
+                            packageState: item
+                        ) { forceInstall in
+                            installPackage(item.package, forceInstall: forceInstall)
+                        }
+                    }
+                } header: {
+                    section(title: "Casks")
+                }
+            }
+        }
+        .padding()
+    }
+    
     @ViewBuilder
     private func section(title: String) -> some View {
         Text(title)
@@ -80,8 +126,15 @@ struct DiscoverView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding([.top, .leading], 8)
     }
+    
+    private func installPackage(_ package: BrewPackage, forceInstall: Bool) {
+        store.send(.installPackage(package, force: forceInstall))
+    }
 }
 
 #Preview {
     DiscoverView()
+        .frame(width: 800, height: 500)
 }
+
+

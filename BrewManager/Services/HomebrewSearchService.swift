@@ -55,7 +55,7 @@ final class DefaultHomebrewSearchService: HomebrewSearchService {
                             casks.map {
                                 var brewPackage = BrewPackage(fromCask: $0)
                                 if let installedPackage = installedPackages
-                                    .first(where: { $0.name == brewPackage.name }) {
+                                    .first(where: { $0.token == brewPackage.token }) {
                                     brewPackage.version = installedPackage.version
                                 }
                                 return brewPackage

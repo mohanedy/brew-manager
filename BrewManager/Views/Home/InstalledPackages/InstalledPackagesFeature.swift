@@ -19,18 +19,18 @@ struct InstalledPackagesFeature {
     
     @ObservableState
     struct State: Equatable {
-        var installedPackages: [InstalledPackageState] = []
-        var allPackages: [InstalledPackageState] = []
+        var installedPackages: [PackageState] = []
+        var allPackages: [PackageState] = []
         var status: Status = .idle
-        var sortOrder = [KeyPathComparator(\InstalledPackageState.installedPackage.name)]
+        var sortOrder = [KeyPathComparator(\PackageState.package.name)]
         var searchText: String = ""
         
-        var filteredPackages: [InstalledPackageState] {
+        var filteredPackages: [PackageState] {
             if searchText.isEmpty {
                 return installedPackages
             }
             return installedPackages.filter {
-                $0.installedPackage.name.lowercased().contains(searchText.lowercased())
+                $0.package.name.lowercased().contains(searchText.lowercased())
             }
         }
         @Presents var alert: AlertState<Action.Alert>?
@@ -39,19 +39,19 @@ struct InstalledPackagesFeature {
     enum Action: Equatable {
         case fetchInstalledPackages
         case installedPackagesResponse([BrewPackage])
-        case sortChanged([KeyPathComparator<InstalledPackageState>])
+        case sortChanged([KeyPathComparator<PackageState>])
         case searchTextChanged(String)
         case debouncedSearch
-        case packageUpdateRequested(InstalledPackageState)
-        case packageUpdateCompleted(InstalledPackageState)
-        case packageDeleteRequested(InstalledPackageState)
+        case packageUpdateRequested(PackageState)
+        case packageUpdateCompleted(PackageState)
+        case packageDeleteRequested(PackageState)
         case alert(PresentationAction<Alert>)
         case updateAllPackagesRequested
         case packageUpgradeUpdate(BrewUpgradeStatus)
         case upgradeAllCompleted(Bool)
         
         enum Alert: Equatable {
-            case deleteConfirmed(InstalledPackageState)
+            case deleteConfirmed(PackageState)
         }
     }
     
@@ -114,7 +114,7 @@ struct InstalledPackagesFeature {
     private func installedPackagesResponse(state: inout State,
                                            result: [BrewPackage])
     -> Effect<Action> {
-        let packages = result.map { InstalledPackageState(installedPackage: $0) }
+        let packages = result.map { PackageState(package: $0) }
         state.installedPackages = packages
         state.allPackages = packages
         state.installedPackages.sort(using: state.sortOrder)
@@ -123,7 +123,7 @@ struct InstalledPackagesFeature {
     }
     
     private func sortChanged(state: inout State,
-                             sortOrder: [KeyPathComparator<InstalledPackageState>])
+                             sortOrder: [KeyPathComparator<PackageState>])
     -> Effect<Action> {
         state.sortOrder = sortOrder
         state.installedPackages.sort(using: sortOrder)
@@ -145,7 +145,7 @@ struct InstalledPackagesFeature {
             state.installedPackages = state.allPackages
         } else {
             state.installedPackages = state.allPackages.filter {
-                $0.installedPackage.name.lowercased().contains(state.searchText.lowercased())
+                $0.package.name.lowercased().contains(state.searchText.lowercased())
             }
         }
         state.installedPackages.sort(using: state.sortOrder)
@@ -153,13 +153,13 @@ struct InstalledPackagesFeature {
     }
     
     private func packageUpdateRequested(state: inout State,
-                                        package: InstalledPackageState)
+                                        package: PackageState)
     -> Effect<Action> {
         let packageIndex = getPackageIndex(state: state, package: package)
         guard let index = packageIndex else { return .none }
         state.installedPackages[index].status = .loading
         return .run { send in
-            _ = await self.brewService.updatePackage(package: package.installedPackage)
+            _ = await self.brewService.updatePackage(package: package.package)
             await send(.packageUpdateCompleted(package))
             try await self.clock.sleep(for: .seconds(2))
             await send(.fetchInstalledPackages)
@@ -167,7 +167,7 @@ struct InstalledPackagesFeature {
     }
     
     private func packageUpdateCompleted(state: inout State,
-                                        package: InstalledPackageState)
+                                        package: PackageState)
     -> Effect<Action> {
         let packageIndex = getPackageIndex(state: state, package: package)
         guard let index = packageIndex else { return .none }
@@ -176,7 +176,7 @@ struct InstalledPackagesFeature {
     }
     
     private func onDeletePackageRequested(state: inout State,
-                                          package: InstalledPackageState)
+                                          package: PackageState)
     -> Effect<Action> {
         state.alert = AlertState(
             title: {
@@ -198,7 +198,7 @@ struct InstalledPackagesFeature {
                 
             },
             message: {
-                TextState("Are you sure you want to uninstall \(package.installedPackage.name)?")
+                TextState("Are you sure you want to uninstall \(package.package.name)?")
             }
         )
         
@@ -206,19 +206,19 @@ struct InstalledPackagesFeature {
     }
     
     private func onDeletePackageConfirmed(state: inout State,
-                                          package: InstalledPackageState)
+                                          package: PackageState)
     -> Effect<Action> {
         let packageIndex = getPackageIndex(state: state, package: package)
         guard let index = packageIndex else { return .none }
         state.installedPackages[index].status = .loading
         return .run { send in
-            _ = await self.brewService.delete(package: package.installedPackage)
+            _ = await self.brewService.delete(package: package.package)
             await send(.fetchInstalledPackages)
         }
     }
     
     private func getPackageIndex(state: State,
-                                 package: InstalledPackageState) -> Int? {
+                                 package: PackageState) -> Int? {
         return state.installedPackages.firstIndex(where: { $0.id == package.id })
     }
     
@@ -241,21 +241,21 @@ struct InstalledPackagesFeature {
         case .packageFetching(let name):
             // Mark package as fetching/loading
             if let index = state.installedPackages
-                .firstIndex(where: { $0.installedPackage.name == name }) {
+                .firstIndex(where: { $0.package.name == name }) {
                 state.installedPackages[index].status = .loading
             }
             
         case .packageUpgrading(let name, _, _):
             // Mark package as upgrading
             if let index = state.installedPackages
-                .firstIndex(where: { $0.installedPackage.name == name }) {
+                .firstIndex(where: { $0.package.name == name }) {
                 state.installedPackages[index].status = .loading
             }
             
         case .packageCompleted(let name):
             // Mark package as completed
             if let index = state.installedPackages
-                .firstIndex(where: { $0.installedPackage.name == name }) {
+                .firstIndex(where: { $0.package.name == name }) {
                 state.installedPackages[index].status = .success(.updated)
             }
         }
@@ -274,13 +274,13 @@ struct InstalledPackagesFeature {
     
 }
 
-struct InstalledPackageState: Equatable, Identifiable {
-    var id: String { installedPackage.name }
-    var installedPackage: BrewPackage
+struct PackageState: Equatable, Identifiable {
+    var id: String { package.token ?? package.name }
+    var package: BrewPackage
     var status: Status
     
-    init(installedPackage: BrewPackage, status: Status = .idle) {
-        self.installedPackage = installedPackage
+    init(package: BrewPackage, status: Status = .idle) {
+        self.package = package
         self.status = status
     }
 }

@@ -23,6 +23,8 @@ protocol HomebrewService {
     func delete(package: BrewPackage) async -> Bool
     func upgradeAllPackages() async -> Bool
     func upgradeAllPackagesWithStreaming(onUpdate: @escaping (BrewUpgradeStatus) -> Void) async -> Bool
+    func installPackage(_ package: BrewPackage, force: Bool) async throws
+    -> Result<Void, BrewError>
     //    func installedPackages() -> [String]
     //    func installPackage(name: String) -> Bool
     //    func uninstallPackage(name: String) -> Bool
@@ -143,7 +145,7 @@ class DefaultHomebrewService: HomebrewService {
     }
     
     func delete(package: BrewPackage) async -> Bool {
-        let command = package.type == .cask ? "uninstall --cask \(package.name)" : "uninstall \(package.name)"
+        let command = package.type == .cask ? "uninstall --cask \(package.token!)" : "uninstall \(package.name)"
         let result = await commandService.runCommand(command, path: brewPath)
         
         if let output = result.output {
@@ -217,5 +219,38 @@ class DefaultHomebrewService: HomebrewService {
         }
         
         return success
+    }
+    
+    func installPackage(_ package: BrewPackage, force: Bool = false) async throws
+    -> Result<Void, BrewError> {
+        var command = package.type == .cask ? "install --cask \(package.token!)" : "install \(package.name)"
+        command += force ? " --force" : ""
+        let result = await commandService.runCommand(command, path: brewPath)
+        
+        if let output = result.output {
+            // Check for successful installation
+            if output.contains("Successfully installed") || output.contains("installed")
+                || result.error == nil || result.error?.isEmpty == true {
+                return .success(())
+            }
+        }
+        
+        if let error = result.error, !error.isEmpty {
+            return .failure(.installationFailed(error))
+        }
+        
+        return .failure(.installationFailed("Unknown error occurred during installation"))
+    }
+    
+}
+
+enum BrewError: Error {
+    case installationFailed(String)
+    
+   var localizedDescription: String {
+        switch self {
+        case .installationFailed(let message):
+            return "Installation failed: \(message)"
+        }
     }
 }

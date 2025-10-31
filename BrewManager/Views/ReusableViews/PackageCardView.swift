@@ -8,18 +8,25 @@
 import SwiftUI
 
 struct PackageCardView: View {
-    let package: BrewPackage
+    let packageState: PackageState
+    let installTapAction: ((Bool) -> Void)?
     
     var isInstalled : Bool {
         return package.version != nil
     }
     
+    var package: BrewPackage {
+        return packageState.package
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(package.name)
+                Text(package.isCask ? package.token! : package.name)
+                    .textSelection(.enabled)
                     .font(.headline)
-                    .lineLimit(1)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
                 Spacer()
                 Text(package.isCask ? "Cask" : "Formula")
                     .font(.caption)
@@ -35,37 +42,76 @@ struct PackageCardView: View {
             Text(package.description ?? "No description available.")
                 .font(.subheadline)
                 .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
             Spacer()
             HStack {
                 Spacer()
-                Button {
-                    
-                } label: {
-                    Text("\(isInstalled ? "Installed" : "Install")")
-                        .font(.subheadline)
+                if packageState.status == .idle {
+                    Button {
+                        if let installTapAction, !isInstalled {
+                            installTapAction(false)
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("\(isInstalled ? "Installed" : "Install")")
+                                .font(.subheadline)
+                            if(!isInstalled) {
+                                Menu {
+                                    Button("Force Install") {
+                                        installTapAction?(true)
+                                    }
+                                } label: {
+                                    EmptyView()
+                                }
+                                .menuStyle(.borderlessButton)
+                                .padding(0)
+                            }
+                        }
+                    }
+                    .buttonStyle(.glassProminent)
+                    .disabled(isInstalled)
+                    .accessibility(label: Text("Install \(package.name)"))
                 }
-                .buttonStyle(.glassProminent)
-                .disabled(isInstalled)
-                .accessibility(label: Text("Install \(package.name)"))
                 
+                if packageState.status == .loading {
+                    ProgressView()
+                        .scaleEffect(0.5)
+                        .frame(width: 20, height: 20)
+                }
                 
+                if packageState.status == .success() {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                    Text("Installed")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
+        .help("\(package.name)\n\n\(package.description ?? "No description available.")")
         .frame(width: 180, height: 150, alignment: .leading)
         .padding()
         .glassEffect(in: .rect(cornerRadius: 16))
+        
         
     }
 }
 
 #Preview {
-    PackageCardView(package: BrewPackage(fromCask: BrewCaskInfo(
-        token: "example",
-        name: ["Example App"],
-        homepage: "https://example.com",
-        installed: nil,
-        version: "1.2.0",
-        desc: "An example application lorem ipsum dolor sit amet. Consectetur adipiscing elit.",
-        tap: "homebrew/cask"
-    )))
+    PackageCardView(
+        packageState: PackageState(
+            package: BrewPackage(
+                fromCask: BrewCaskInfo(
+                    token: "github-copilot-for-xcode",
+                    name: ["GitHub Copilot for Xcode"],
+                    homepage: "https://example.com",
+                    installed: nil,
+                    version: "1.2.0",
+                    desc: "An example application lorem ipsum dolor sit amet. Consectetur adipiscing elit.",
+                    tap: "homebrew/cask"
+                )),
+            status: .idle
+        ),
+        installTapAction: nil
+    )
 }

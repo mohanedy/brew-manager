@@ -50,13 +50,13 @@ struct InstalledPackagesView: View {
     private func packagesTable() -> some View {
         Table(store.filteredPackages,
               sortOrder: $store.sortOrder.sending(\.sortChanged)) {
-            TableColumn("Name", value: \.installedPackage.name)
-            TableColumn("Type", value: \.installedPackage.type.rawValue)
+            TableColumn("Name", value: \.package.name)
+            TableColumn("Type", value: \.package.type.rawValue)
             TableColumn("Version") { packageState in
-                Text(packageState.installedPackage.version ?? "N/A")
+                Text(packageState.package.version ?? "N/A")
             }
             TableColumn("Latest Version" ) { packageState in
-                Text(packageState.installedPackage.latestVersion ?? "N/A")
+                Text(packageState.package.latestVersion ?? "N/A")
             }
             TableColumn("Status") { packageState in
                 HStack(spacing: 4) {
@@ -86,7 +86,7 @@ struct InstalledPackagesView: View {
                 }
             }
             TableColumn("Actions") { packageState in
-                let formula = packageState.installedPackage
+                let formula = packageState.package
                 HStack {
                     Button {
                         store.send(.packageUpdateRequested(packageState))
