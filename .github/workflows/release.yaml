@@ -5,6 +5,10 @@ on:
         tags:
             - "v*"
     workflow_dispatch:
+        inputs:
+            version:
+                description: 'The version to release (e.g., 1.0.0)'
+                required: true
 
 jobs:
     build:
@@ -84,6 +88,9 @@ jobs:
               id: version
               run: |
                   VERSION=${GITHUB_REF#refs/tags/v}
+                  if [ "$VERSION" = "${GITHUB_REF}" ]; then
+                    VERSION=${{ github.event.inputs.version }}
+                  fi
                   echo "VERSION=$VERSION" >> $GITHUB_ENV
 
             - name: Update appcast.xml
