@@ -12,7 +12,7 @@ import Combine
 // This view model class publishes when new updates can be checked by the user
 final class CheckForUpdatesViewModel: ObservableObject {
     @Published var canCheckForUpdates = false
-
+    
     init(updater: SPUUpdater) {
         updater.publisher(for: \.canCheckForUpdates)
             .assign(to: &$canCheckForUpdates)
@@ -32,7 +32,11 @@ struct CheckForUpdatesView: View {
     }
     
     var body: some View {
-        Button("Check for Updates…", systemImage: "arrow.trianglehead.2.clockwise", action: updater.checkForUpdates)
-            .disabled(!checkForUpdatesViewModel.canCheckForUpdates)
+        Button(
+            "Check for Updates…",
+            systemImage: "arrow.trianglehead.2.clockwise",
+            action: updater.checkForUpdates
+        )
+        .disabled(!checkForUpdatesViewModel.canCheckForUpdates)
     }
 }
