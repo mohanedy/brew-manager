@@ -14,11 +14,6 @@ struct HomeView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Welcome to BrewManager!")
-                .font(.largeTitle)
-            Text("Manage your Homebrew packages with ease.")
-                .font(.subheadline)
-                .padding(.bottom, 20)
             HStack() {
                 CardView(
                     title: "Homebrew Version",
