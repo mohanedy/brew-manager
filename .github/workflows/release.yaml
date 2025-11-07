@@ -107,13 +107,16 @@ jobs:
                   </rss>
                   EOF
 
-            - name: Commit appcast
-              run: |
-                  git config user.name "GitHub Actions"
-                  git config user.email "actions@github.com"
-                  git add appcast.xml
-                  git commit -m "Update appcast for v${{ env.VERSION }}"
-                  git push origin HEAD:main
+            - name: Create Pull Request
+              uses: peter-evans/create-pull-request@v6
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  commit-message: Update appcast for v${{ env.VERSION }}
+                  title: "Update appcast for v${{ env.VERSION }}"
+                  body: "This PR updates the appcast.xml for the new release."
+                  branch: update-appcast-v${{ env.VERSION }}
+                  base: main
+                  delete-branch: true
 
             - name: Create Release
               uses: softprops/action-gh-release@v1
