@@ -17,7 +17,8 @@ protocol CommandService {
 
 class DefaultCommandService: CommandService {
     
-    let logger = Logger(subsystem: "com.izam.BrewManager", category: "CommandService")
+    let logger = Logger(subsystem: "com.mohanedy.BrewManager",
+                        category: "CommandService")
     
     // Actor for thread-safe output accumulation
     private actor OutputAccumulator {
