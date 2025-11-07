@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+    <channel>
+        <title>BrewManager</title>
+        <item>
+            <title>Version 1.0.1</title>
+            <sparkle:version>1.0.1</sparkle:version>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Sat, 26 Jul 2025 15:20:00 +0000</pubDate>
+            <enclosure url="https://github.com/username/BrewManager/releases/download/v1.0.0/BrewManager.zip"
+                       sparkle:edSignature="YOUR_SIGNATURE"
+                       length="1623481"
+                       type="application/octet-stream"/>
+        </item>
+    </channel>
+</rss>
