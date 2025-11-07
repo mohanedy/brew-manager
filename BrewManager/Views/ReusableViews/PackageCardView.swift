@@ -45,6 +45,17 @@ struct PackageCardView: View {
                 .fixedSize(horizontal: false, vertical: true)
             Spacer()
             HStack {
+                if package.homepage != nil {
+                    Button {
+                        if let url = URL(string: package.homepage ?? "") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    } label: {
+                        Image(systemName: "safari")
+                    }
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(Color(.linkColor))
+                }
                 Spacer()
                 if packageState.status == .idle {
                     Button {
