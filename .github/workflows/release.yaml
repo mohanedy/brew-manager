@@ -76,7 +76,7 @@ jobs:
                   SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
               run: |
                   # Find the sign_update executable
-                  SIGN_UPDATE_PATH=$(find $(brew --prefix)/Cellar/sparkle -name "sign_update" -type f | head -n 1)
+                  SIGN_UPDATE_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "sign_update" -type f | head -n 1)
                   if [ -z "$SIGN_UPDATE_PATH" ]; then
                     echo "Error: sign_update not found."
                     exit 1
