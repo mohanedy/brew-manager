@@ -71,27 +71,16 @@ jobs:
                     "build/BrewManager.dmg" \
                     "build/BrewManager.app"
 
-            - name: Sign update
+            - name: Setup Sparkle private key
               env:
                   SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
               run: |
-                  # Find the sign_update executable
-                  SIGN_UPDATE_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "sign_update" -type f | head -n 1)
-                  if [ -z "$SIGN_UPDATE_PATH" ]; then
-                    echo "Error: sign_update not found."
-                    exit 1
-                  fi
-                  
-                  # Create a temporary file for the private key
+                  # Create a temporary file for the private key and add to keychain
                   KEY_PATH=$(mktemp)
                   echo "$SPARKLE_PRIVATE_KEY" > "$KEY_PATH"
-
-                  # Sign the update
-                  SIGNATURE=$("$SIGN_UPDATE_PATH" build/BrewManager.zip "$KEY_PATH" | grep "sparkle:edSignature" | cut -d'"' -f2)
-                  echo "SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
-
-                  # Clean up the temporary key file
-                  rm "$KEY_PATH"
+                  
+                  # Store key path for later use
+                  echo "SPARKLE_KEY_PATH=$KEY_PATH" >> $GITHUB_ENV
 
             - name: Get version
               id: version
@@ -104,25 +93,41 @@ jobs:
 
             - name: Update appcast.xml
               run: |
-                  DATE=$(date -u +"%a, %d %b %Y %H:%M:%S %z")
-                  cat > appcast.xml << EOF
-                  <?xml version="1.0" encoding="utf-8"?>
-                  <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
-                      <channel>
-                          <title>BrewManager</title>
-                          <item>
-                              <title>Version ${{ env.VERSION }}</title>
-                              <sparkle:version>${{ env.VERSION }}</sparkle:version>
-                              <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
-                              <pubDate>${DATE}</pubDate>
-                              <enclosure url="https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/BrewManager.zip"
-                                         sparkle:edSignature="${{ env.SIGNATURE }}"
-                                         length="${{ env.ZIP_SIZE }}"
-                                         type="application/octet-stream"/>
-                          </item>
-                      </channel>
-                  </rss>
-                  EOF
+                  # Find the generate_appcast executable
+                  GENERATE_APPCAST_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "generate_appcast" -type f | head -n 1)
+                  
+                  if [ -z "$GENERATE_APPCAST_PATH" ]; then
+                    echo "Error: generate_appcast not found in Xcode DerivedData"
+                    echo "Searching in common locations..."
+                    find ~/Library/Developer -name "generate_appcast" -type f 2>/dev/null || true
+                    exit 1
+                  fi
+                  
+                  echo "Found generate_appcast at: $GENERATE_APPCAST_PATH"
+                  
+                  # Create a temporary directory for the release
+                  RELEASE_DIR=$(mktemp -d)
+                  cp build/BrewManager.zip "$RELEASE_DIR/"
+                  
+                  # Generate appcast with automatic signing
+                  "$GENERATE_APPCAST_PATH" "$RELEASE_DIR" \
+                    -o ./appcast.xml \
+                    --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/" \
+                    --ed-key-file "$SPARKLE_KEY_PATH"
+                  
+                  # Clean up
+                  rm -rf "$RELEASE_DIR"
+                  
+                  echo "Appcast generated successfully"
+                  cat appcast.xml
+            
+            - name: Cleanup Sparkle key
+              if: always()
+              run: |
+                  # Clean up the private key file
+                  if [ -f "$SPARKLE_KEY_PATH" ]; then
+                    rm "$SPARKLE_KEY_PATH"
+                  fi
 
             - name: Create Pull Request
               uses: peter-evans/create-pull-request@v6
@@ -135,17 +140,21 @@ jobs:
                   base: main
                   delete-branch: true
 
+            - name: Generate changelog
+              id: changelog
+              uses: TriPSs/conventional-changelog-action@v5
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  output-file: "false"
+
             - name: Create Release
-              uses: softprops/action-gh-release@v1
+              uses: softprops/action-gh-release@v2.4.1
               with:
                   files: |
                       build/BrewManager.zip
                       build/BrewManager.dmg
-                  body: |
-                      ## Changes in v${{ env.VERSION }}
-
-                      Download BrewManager.dmg for easy installation, or BrewManager.zip for Sparkle updates.
+                  body: ${{ steps.changelog.outputs.changelog }}
                   draft: false
-                  prerelease: false
+                  prerelease: ${{ contains(steps.version.outputs.VERSION, '-') }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
