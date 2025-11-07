@@ -41,6 +41,23 @@ jobs:
                   ZIP_SIZE=$(stat -f%z BrewManager.zip)
                   echo "ZIP_SIZE=$ZIP_SIZE" >> $GITHUB_ENV
 
+            - name: Create DMG
+              run: |
+                  # Install create-dmg if not available
+                  brew install create-dmg || true
+                  
+                  # Create DMG
+                  create-dmg \
+                    --volname "BrewManager" \
+                    --window-pos 200 120 \
+                    --window-size 800 400 \
+                    --icon-size 100 \
+                    --icon "BrewManager.app" 200 190 \
+                    --hide-extension "BrewManager.app" \
+                    --app-drop-link 600 185 \
+                    "build/BrewManager.dmg" \
+                    "build/BrewManager.app"
+
             - name: Sign update
               env:
                   SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
@@ -91,11 +108,13 @@ jobs:
             - name: Create Release
               uses: softprops/action-gh-release@v1
               with:
-                  files: build/BrewManager.zip
+                  files: |
+                      build/BrewManager.zip
+                      build/BrewManager.dmg
                   body: |
                       ## Changes in v${{ env.VERSION }}
 
-                      Download BrewManager.zip below and extract to install.
+                      Download BrewManager.dmg for easy installation, or BrewManager.zip for Sparkle updates.
                   draft: false
                   prerelease: false
               env:
