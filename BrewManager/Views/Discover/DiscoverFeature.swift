@@ -79,10 +79,7 @@ struct DiscoverFeature {
                 return .none
             
             case .installPackage(let package, let force):
-                guard let index = getPackageIndex(state: state, package: PackageState(package: package)) else {
-                    return .none
-                }
-                state.searchResults[index].status = .loading
+                updatePackageStatus(state: &state, package: package, status: .loading)
                 return .run { send in
                     let result = try await self.brewService
                         .installPackage(package, force: force)
@@ -90,14 +87,11 @@ struct DiscoverFeature {
                 }
                 
             case .installationCompleted(let package, let result):
-                guard let index = getPackageIndex(state: state, package: PackageState(package: package)) else {
-                    return .none
-                }
                 switch result {
                 case .success():
-                    state.searchResults[index].status = .success()
+                    updatePackageStatus(state: &state, package: package, status: .success())
                 case .failure(let error):
-                    state.searchResults[index].status = .idle
+                    updatePackageStatus(state: &state, package: package, status: .idle)
                     state.alert = AlertState(
                         title: {
                             TextState("Installation Error")
@@ -121,6 +115,21 @@ struct DiscoverFeature {
             }
         }
         .ifLet(\.$alert, action: \.alert)
+    }
+    
+    private func updatePackageStatus(state: inout State, package: BrewPackage, status: Status) {
+        let packageState = PackageState(package: package)
+        if let index = state.searchResults.firstIndex(where: { $0.id == packageState.id }) {
+            state.searchResults[index].status = status
+        }
+        
+        if let index = state.formulaeResults.firstIndex(where: { $0.id == packageState.id }) {
+            state.formulaeResults[index].status = status
+        }
+        
+        if let index = state.caskResults.firstIndex(where: { $0.id == packageState.id }) {
+            state.caskResults[index].status = status
+        }
     }
     
     private func getPackageIndex(state: State,
