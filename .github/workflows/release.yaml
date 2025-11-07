@@ -32,7 +32,7 @@ jobs:
                   xcodebuild -exportArchive \
                     -archivePath ./build/BrewManager.xcarchive \
                     -exportPath ./build \
-                    -exportOptionsPlist exportOptions.plist
+                    -exportOptionsPlist ExportOptions.plist
 
             - name: Create ZIP
               run: |

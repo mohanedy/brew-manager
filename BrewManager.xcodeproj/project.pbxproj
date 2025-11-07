@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2D0B22D52EBE1ABA00C062DB /* exportOptions.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2D0B22D42EBE1ABA00C062DB /* exportOptions.plist */; };
+		2D0B22D52EBE1ABA00C062DB /* ExportOptions.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2D0B22D42EBE1ABA00C062DB /* ExportOptions.plist */; };
 		2D25E8CC2E9AE35600D232BA /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2D25E8CB2E9AE35600D232BA /* FactoryKit */; };
 		2D25E8CE2E9AE35600D232BA /* FactoryTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 2D25E8CD2E9AE35600D232BA /* FactoryTesting */; };
 		2D292BF42EA3EBEC00ABC886 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 2D292BF32EA3EBEC00ABC886 /* Sparkle */; };
@@ -25,7 +25,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2D0B22D42EBE1ABA00C062DB /* exportOptions.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = exportOptions.plist; sourceTree = "<group>"; };
+		2D0B22D42EBE1ABA00C062DB /* ExportOptions.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ExportOptions.plist; sourceTree = "<group>"; };
 		2D77072E2E9A9B5000E895D8 /* BrewManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BrewManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D77073D2E9A9B5100E895D8 /* BrewManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -81,7 +81,7 @@
 		2D7707252E9A9B5000E895D8 = {
 			isa = PBXGroup;
 			children = (
-				2D0B22D42EBE1ABA00C062DB /* exportOptions.plist */,
+				2D0B22D42EBE1ABA00C062DB /* ExportOptions.plist */,
 				2D7707302E9A9B5000E895D8 /* BrewManager */,
 				2D7707402E9A9B5100E895D8 /* BrewManagerTests */,
 				2D77072F2E9A9B5000E895D8 /* Products */,
@@ -198,7 +198,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2D0B22D52EBE1ABA00C062DB /* exportOptions.plist in Resources */,
+				2D0B22D52EBE1ABA00C062DB /* ExportOptions.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
