@@ -3,13 +3,13 @@
     <channel>
         <title>BrewManager</title>
         <item>
-            <title>Version 1.0.1</title>
-            <sparkle:version>1.0.1</sparkle:version>
-            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <pubDate>Sat, 26 Jul 2025 15:20:00 +0000</pubDate>
-            <enclosure url="https://github.com/username/BrewManager/releases/download/v1.0.0/BrewManager.zip"
-                       sparkle:edSignature="YOUR_SIGNATURE"
-                       length="1623481"
+            <title>Version 0.0.1</title>
+            <sparkle:version>0.0.1</sparkle:version>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <pubDate>Fri, 07 Nov 2025 16:04:12 +0000</pubDate>
+            <enclosure url="https://github.com/mohanedy/brew-manager/releases/download/v0.0.1/BrewManager.zip"
+                       sparkle:edSignature=""
+                       length="9804450"
                        type="application/octet-stream"/>
         </item>
     </channel>
