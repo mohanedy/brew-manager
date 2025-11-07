@@ -82,22 +82,28 @@ struct PackageCardView: View {
                     .buttonStyle(.glassProminent)
                     .disabled(isInstalled)
                     .accessibility(label: Text("Install \(package.name)"))
+                    .transition(.opacity.combined(with: .scale(scale: 0.8)))
                 }
                 
                 if packageState.status == .loading {
                     ProgressView()
                         .scaleEffect(0.5)
                         .frame(width: 20, height: 20)
+                        .transition(.opacity.combined(with: .scale(scale: 0.5)))
                 }
                 
                 if packageState.status == .success() {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                    Text("Installed")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                        Text("Installed")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .transition(.opacity.combined(with: .scale(scale: 0.8)))
                 }
             }
+            .animation(.easeInOut(duration: 0.3), value: packageState.status)
         }
         .help("\(package.name)\n\n\(package.description ?? "No description available.")")
         .frame(width: 180, height: 150, alignment: .leading)

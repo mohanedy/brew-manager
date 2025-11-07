@@ -20,12 +20,8 @@ struct DiscoverFeature {
     struct State: Equatable {
         var searchQuery: String = ""
         var searchResults: [PackageState] = []
-        var formulaeResults: [PackageState] {
-            searchResults.filter { $0.package.type == .formula }
-        }
-        var caskResults: [PackageState] {
-            searchResults.filter { $0.package.type == .cask }
-        }
+        var formulaeResults: [PackageState] = []
+        var caskResults: [PackageState] = []
         var status: Status = .idle
         var selectedFilter: PackageFilter = .all
         @Presents var alert: AlertState<Action.Alert>?
@@ -55,6 +51,8 @@ struct DiscoverFeature {
                 }
                 guard !query.isEmpty else {
                     state.searchResults = []
+                    state.formulaeResults = []
+                    state.caskResults = []
                     state.status = .idle
                     return .none
                 }
@@ -70,6 +68,8 @@ struct DiscoverFeature {
                 
             case .searchCompleted(let results):
                 state.searchResults = results.map { PackageState(package: $0) }
+                state.formulaeResults = state.searchResults.filter { $0.package.type == .formula }
+                state.caskResults = state.searchResults.filter { $0.package.type == .cask }
                 print("Search completed with \(results.count) results.")
                 state.status = .success()
                 return .none
