@@ -28,11 +28,15 @@ jobs:
                   xcodebuild -scheme BrewManager \
                     -configuration Release \
                     -archivePath ./build/BrewManager.xcarchive \
+                    -skipPackagePluginValidation \
+                    -skipMacroValidation \
                     archive
 
                   xcodebuild -exportArchive \
                     -archivePath ./build/BrewManager.xcarchive \
                     -exportPath ./build \
+                    -skipPackagePluginValidation \
+                    -skipMacroValidation \
                     -exportOptionsPlist ExportOptions.plist
 
             - name: Create ZIP
