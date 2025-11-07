@@ -25,11 +25,6 @@ protocol HomebrewService {
     func upgradeAllPackagesWithStreaming(onUpdate: @escaping (BrewUpgradeStatus) -> Void) async -> Bool
     func installPackage(_ package: BrewPackage, force: Bool) async throws
     -> Result<Void, BrewError>
-    //    func installedPackages() -> [String]
-    //    func installPackage(name: String) -> Bool
-    //    func uninstallPackage(name: String) -> Bool
-    //    func updatePackage(name: String) -> Bool
-    //    func upgradeAllPackages() -> Bool
 }
 
 
