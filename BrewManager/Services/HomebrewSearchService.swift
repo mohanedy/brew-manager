@@ -64,7 +64,7 @@ final class DefaultHomebrewSearchService: HomebrewSearchService {
             let lowercasedQuery = query.lowercased()
             let packages = fullPackages.filter { package in
                 package.name.lowercased().contains(lowercasedQuery) ||
-                (package.description?.lowercased().contains(lowercasedQuery) ?? false)
+                (package.token?.lowercased().contains(lowercasedQuery) ?? false)
             }
             
             let packagesWithInstallationStatus = packages.map { package -> BrewPackage in
