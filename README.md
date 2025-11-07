@@ -12,8 +12,8 @@
 <img src="https://img.shields.io/github/license/aagarwal1012/animated-text-kit?color=red"
 alt="License: MIT" />
 </a>
-<a href="https://github.com/Mohanedy/brew-manager/actions/workflows/release.yml">
-<img src="https://github.com/Mohanedy/brew-manager/actions/workflows/release.yml/badge.svg" alt="Build Status">
+<a href="https://github.com/mohanedy/brew-manager/actions/workflows/release.yaml">
+<img src="https://github.com/mohanedy/brew-manager/actions/workflows/release.yaml/badge.svg" alt="Build Status">
 </a>
 
 BrewManager is a macOS application that provides a user-friendly interface for managing Homebrew formulae, and casks. It simplifies the process of installing, updating, and removing Homebrew packages on your Mac.
