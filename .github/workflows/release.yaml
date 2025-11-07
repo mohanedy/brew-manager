@@ -75,9 +75,23 @@ jobs:
               env:
                   SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
               run: |
+                  # Find the sign_update executable
+                  SIGN_UPDATE_PATH=$(find $(brew --prefix)/Cellar/sparkle -name "sign_update" -type f | head -n 1)
+                  if [ -z "$SIGN_UPDATE_PATH" ]; then
+                    echo "Error: sign_update not found."
+                    exit 1
+                  fi
+                  
+                  # Create a temporary file for the private key
+                  KEY_PATH=$(mktemp)
+                  echo "$SPARKLE_PRIVATE_KEY" > "$KEY_PATH"
+
                   # Sign the update
-                  SIGNATURE=$(./bin/sign_update build/BrewManager.zip "$SPARKLE_PRIVATE_KEY" | grep "sparkle:edSignature" | cut -d'"' -f2)
+                  SIGNATURE=$("$SIGN_UPDATE_PATH" build/BrewManager.zip "$KEY_PATH" | grep "sparkle:edSignature" | cut -d'"' -f2)
                   echo "SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
+
+                  # Clean up the temporary key file
+                  rm "$KEY_PATH"
 
             - name: Get version
               id: version
