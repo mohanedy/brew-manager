@@ -28,7 +28,6 @@ final class DefaultHomebrewSearchService: HomebrewSearchService {
         do  {
             if fullPackages.isEmpty {
                 fullPackages = try await withThrowingTaskGroup(of: [BrewPackage].self) { taskGroup in
-                    let installedPackages = await brewService.installedFormulas()
                     taskGroup.addTask {
                         let formulaeData = try await self.networkService
                             .fetchData(from: self.formulaeURL)
@@ -36,13 +35,7 @@ final class DefaultHomebrewSearchService: HomebrewSearchService {
                             .decode([BrewFormulaInfo].self, from: formulaeData)
                         return await MainActor.run {
                             formulae.map {
-                                var brewPackage = BrewPackage(fromFormula: $0)
-                                if let installedPackage = installedPackages
-                                    .first(where: { $0.name == brewPackage.name }) {
-                                    brewPackage.version = installedPackage.version
-                                }
-                                
-                                return brewPackage
+                                BrewPackage(fromFormula: $0)
                             }
                         }
                     }
@@ -53,12 +46,7 @@ final class DefaultHomebrewSearchService: HomebrewSearchService {
                             .decode([BrewCaskInfo].self, from: casksData)
                         return await MainActor.run {
                             casks.map {
-                                var brewPackage = BrewPackage(fromCask: $0)
-                                if let installedPackage = installedPackages
-                                    .first(where: { $0.token == brewPackage.token }) {
-                                    brewPackage.version = installedPackage.version
-                                }
-                                return brewPackage
+                                BrewPackage(fromCask: $0)
                             }
                         }
                     }
@@ -69,13 +57,27 @@ final class DefaultHomebrewSearchService: HomebrewSearchService {
                 }
             }
             
+            let installedPackages = await brewService.installedFormulas()
+            
+            
+            
             let lowercasedQuery = query.lowercased()
             let packages = fullPackages.filter { package in
                 package.name.lowercased().contains(lowercasedQuery) ||
                 (package.description?.lowercased().contains(lowercasedQuery) ?? false)
             }
             
-            return packages
+            let packagesWithInstallationStatus = packages.map { package -> BrewPackage in
+                var mutablePackage = package
+                if let installedPackage = installedPackages
+                    .first(where: { (package.isFormula && $0.name == package.name)
+                        || (package.isCask && $0.token == package.token) }) {
+                    mutablePackage.version = installedPackage.version
+                }
+                return mutablePackage
+            }
+            
+            return packagesWithInstallationStatus
             
         } catch {
             print("Error fetching formulae: \(error)")
