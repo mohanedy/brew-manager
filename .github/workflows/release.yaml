@@ -15,6 +15,9 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0  # Fetch all history for changelog generation
+                  ref: ${{ github.event.repository.default_branch }}
 
             - name: Setup Xcode
               uses: maxim-lobanov/setup-xcode@v1
@@ -146,6 +149,9 @@ jobs:
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   output-file: "false"
+                  skip-git-pull: true
+                  skip-commit: true
+                  skip-tag: true
 
             - name: Create Release
               uses: softprops/action-gh-release@v2.4.1
