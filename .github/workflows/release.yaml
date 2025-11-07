@@ -73,11 +73,8 @@ jobs:
               env:
                   SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
               run: |
-                  # Import private key from secrets
-                  security import <(echo "$SPARKLE_PRIVATE_KEY") -k ~/Library/Keychains/login.keychain-db
-
                   # Sign the update
-                  SIGNATURE=$(sign_update build/BrewManager.zip | grep "sparkle:edSignature" | cut -d'"' -f2)
+                  SIGNATURE=$(./bin/sign_update build/BrewManager.zip "$SPARKLE_PRIVATE_KEY" | grep "sparkle:edSignature" | cut -d'"' -f2)
                   echo "SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
 
             - name: Get version
